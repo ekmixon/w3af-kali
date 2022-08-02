@@ -59,6 +59,6 @@ class proxy(ExploitResult, CommonAttackMethods):
         raise BaseFrameworkException('You should implement the get_name method of classes that inherit from "proxy"')
 
     def __repr__(self):
-        return '<proxy server at: ' + self._proxyDaemon.get_bind_ip() + ':' + str(self._proxyDaemon.get_bind_port()) + '>'
+        return f'<proxy server at: {self._proxyDaemon.get_bind_ip()}:{str(self._proxyDaemon.get_bind_port())}>'
 
     __str__ = __repr__

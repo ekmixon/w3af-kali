@@ -114,13 +114,13 @@ class TestVariantDB(unittest.TestCase):
     def test_clean_fuzzable_request_file(self):
         u = 'http://w3af.org/index.php'
         s = clean_fuzzable_request(fr(URL(u)))
-        e = u'(GET)-http://w3af.org/%s.php' % FILENAME_TOKEN
+        e = f'(GET)-http://w3af.org/{FILENAME_TOKEN}.php'
         self.assertEqual(s, e)
 
     def test_clean_fuzzable_request_directory_file(self):
         u = 'http://w3af.org/foo/index.php'
         s = clean_fuzzable_request(fr(URL(u)))
-        e = u'(GET)-http://w3af.org/foo/%s.php' % FILENAME_TOKEN
+        e = f'(GET)-http://w3af.org/foo/{FILENAME_TOKEN}.php'
         self.assertEqual(s, e)
 
     def test_clean_fuzzable_request_directory_file_int(self):
@@ -150,19 +150,19 @@ class TestVariantDB(unittest.TestCase):
     def test_clean_fuzzable_request_directory_file_no_params(self):
         u = 'http://w3af.org/foo/index.php'
         s = clean_fuzzable_request(fr(URL(u)))
-        e = u'(GET)-http://w3af.org/foo/%s.php' % FILENAME_TOKEN
+        e = f'(GET)-http://w3af.org/foo/{FILENAME_TOKEN}.php'
         self.assertEqual(s, e)
 
     def test_clean_fuzzable_request_directory(self):
         u = 'http://w3af.org/foo/'
         s = clean_fuzzable_request(fr(URL(u)))
-        e = u'(GET)-http://w3af.org/%s/' % PATH_TOKEN
+        e = f'(GET)-http://w3af.org/{PATH_TOKEN}/'
         self.assertEqual(s, e)
 
     def test_clean_fuzzable_request_directory_parent_path(self):
         u = 'http://w3af.org/spam/foo/'
         s = clean_fuzzable_request(fr(URL(u)))
-        e = u'(GET)-http://w3af.org/spam/%s/' % PATH_TOKEN
+        e = f'(GET)-http://w3af.org/spam/{PATH_TOKEN}/'
         self.assertEqual(s, e)
 
     def test_clean_form_fuzzable_request(self):

@@ -101,7 +101,7 @@ class SGMLParser(BaseParser):
     def _handle_exception(self, where, ex):
         msg = 'An exception occurred while %s: "%s"'
         om.out.error(msg % (where, ex))
-        om.out.error('Error traceback: %s' % traceback.format_exc())
+        om.out.error(f'Error traceback: {traceback.format_exc()}')
 
     def start(self, tag):
         """
@@ -145,7 +145,7 @@ class SGMLParser(BaseParser):
         """
         # Call handler method if exists
         try:
-            method = getattr(self, '_handle_%s_tag_end' % tag.tag)
+            method = getattr(self, f'_handle_{tag.tag}_tag_end')
         except AttributeError:
             return
         else:
@@ -336,15 +336,16 @@ class SGMLParser(BaseParser):
         filter_ref = self._filter_ref
 
         for _, mailto_address in filter(filter_ref, attrs.iteritems()):
-            if '@' in mailto_address:
-                if mailto_address.lower().startswith('mailto:'):
-                    try:
-                        email = self._parse_mailto(mailto_address)
-                    except ValueError:
-                        # It was an invalid email
-                        pass
-                    else:
-                        self._emails.add(email)
+            if '@' in mailto_address and mailto_address.lower().startswith(
+                'mailto:'
+            ):
+                try:
+                    email = self._parse_mailto(mailto_address)
+                except ValueError:
+                    # It was an invalid email
+                    pass
+                else:
+                    self._emails.add(email)
 
     def _parse_mailto(self, mailto):
         mailto = urllib.unquote_plus(mailto)
@@ -364,12 +365,14 @@ class SGMLParser(BaseParser):
         key = attr[0]
         value = attr[1]
 
-        return (value
-                and key in self.URL_ATTRS
-                and not value.startswith('#')
-                and not value.startswith('tel:')
-                and not value.startswith('callto:')
-                and not value in self.APACHE_INDEXING)
+        return (
+            value
+            and key in self.URL_ATTRS
+            and not value.startswith('#')
+            and not value.startswith('tel:')
+            and not value.startswith('callto:')
+            and value not in self.APACHE_INDEXING
+        )
 
     def _find_references(self, tag, tag_name, attrs):
         """
@@ -458,8 +461,7 @@ class SGMLParser(BaseParser):
         :return: A clear text representation of the HTTP response body.
         """
         body = self.get_http_response().get_body()
-        clear_text = self.ANY_TAG_MATCH.sub(u'', body)
-        return clear_text
+        return self.ANY_TAG_MATCH.sub(u'', body)
 
     def get_references_of_tag(self, tag_type):
         """

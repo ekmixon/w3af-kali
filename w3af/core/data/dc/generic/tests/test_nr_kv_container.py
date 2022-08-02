@@ -60,7 +60,7 @@ class TestNoRepeatKeyValueContainer(unittest.TestCase):
 
     def test_iter_tokens(self):
         dc = NonRepeatKeyValueContainer([(u'a', u'1'), (u'b', u'2')])
-        tokens = [t for t in dc.iter_tokens()]
+        tokens = list(dc.iter_tokens())
 
         EXPECTED_TOKENS = [('a', '1'), ('b', '2')]
         token_data = [(t.get_name(), t.get_value()) for t in tokens]
@@ -68,7 +68,7 @@ class TestNoRepeatKeyValueContainer(unittest.TestCase):
 
     def test_iter_bound_tokens(self):
         dc = NonRepeatKeyValueContainer([(u'a', u'1'), (u'b', u'2')])
-        dcc_tokens = [(dcc, t) for dcc, t in dc.iter_bound_tokens()]
+        dcc_tokens = list(dc.iter_bound_tokens())
 
         EXPECTED_TOKENS = [('a', '1'), ('b', '2')]
         token_data = [(t.get_name(), t.get_value()) for dcc, t in dcc_tokens]
@@ -93,7 +93,7 @@ class TestNoRepeatKeyValueContainer(unittest.TestCase):
 
     def test_iter_setters(self):
         dc = NonRepeatKeyValueContainer([(u'a', u'1'), (u'b', u'2')])
-        kv_setter = [(k, v, p, s) for (k, v, p, s) in dc.iter_setters()]
+        kv_setter = list(dc.iter_setters())
 
         EXPECTED_KEY_VALUES = [('a', '1', ('a',)), ('b', '2', ('b',))]
         kvp = [(key, value, path) for (key, value, path, _) in kv_setter]

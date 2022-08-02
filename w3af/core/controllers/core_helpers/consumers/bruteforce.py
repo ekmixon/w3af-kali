@@ -66,8 +66,8 @@ class bruteforce(BaseConsumer):
     def _consume(self, function_id, work_unit):
         self._run_observers(work_unit)
 
+        stats = '%s plugin is testing: "%s"'
         for plugin in self._consumer_plugins:
-            stats = '%s plugin is testing: "%s"'
             om.out.debug(stats % (plugin.get_name(), work_unit))
 
             self._threadpool.apply_async(return_args(self._bruteforce),

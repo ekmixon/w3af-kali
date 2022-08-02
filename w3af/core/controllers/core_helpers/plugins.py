@@ -152,14 +152,14 @@ class w3af_core_plugins(object):
         plugin_names = list(set(plugin_names))
         known_plugin_names = self.get_plugin_list(plugin_type)
         unknown_plugins = []
-        
+
         for plugin_name in plugin_names:
             if plugin_name not in known_plugin_names \
-            and plugin_name.replace('!', '') not in known_plugin_names\
-            and plugin_name != 'all':
-            
+                and plugin_name.replace('!', '') not in known_plugin_names\
+                and plugin_name != 'all':
+                    
                 if raise_on_error:
-                    raise ValueError('Unknown plugin %s' % plugin_name)
+                    raise ValueError(f'Unknown plugin {plugin_name}')
                 else:
                     unknown_plugins.append(plugin_name)
 
@@ -180,7 +180,7 @@ class w3af_core_plugins(object):
         }
 
         set_dict[plugin_type](plugin_names)
-        
+
         return unknown_plugins
     
     def reload_modified_plugin(self, plugin_type, plugin_name):
@@ -193,8 +193,7 @@ class w3af_core_plugins(object):
         :param plugin_name: The plugin name of the modified plugin ('xss', 'sqli', etc)
         """
         try:
-            aModule = sys.modules['w3af.plugins.' + plugin_type +
-                                  '.' + plugin_name]
+            aModule = sys.modules[((f'w3af.plugins.{plugin_type}' + '.') + plugin_name)]
         except KeyError:
             msg = 'Tried to reload a plugin that was never imported! (%s.%s)'
             om.out.debug(msg % (plugin_type, plugin_name))
@@ -207,8 +206,8 @@ class w3af_core_plugins(object):
         :return: A description of the plugin type passed as parameter
         """
         try:
-            __import__('w3af.plugins.' + plugin_type)
-            aModule = sys.modules['w3af.plugins.' + plugin_type]
+            __import__(f'w3af.plugins.{plugin_type}')
+            aModule = sys.modules[f'w3af.plugins.{plugin_type}']
         except Exception:
             raise BaseFrameworkException('Unknown plugin type: "%s".' % plugin_type)
         else:
@@ -223,7 +222,8 @@ class w3af_core_plugins(object):
                 lst.remove(ele)
             except:
                 pass
-        plugin_types = [x for x in os.listdir(os.path.join(ROOT_PATH, 'plugins'))]
+
+        plugin_types = list(os.listdir(os.path.join(ROOT_PATH, 'plugins')))
         # Now we filter to show only the directories
         plugin_types = [d for d in plugin_types
                         if os.path.isdir(os.path.join(ROOT_PATH, 'plugins', d))]
@@ -236,18 +236,16 @@ class w3af_core_plugins(object):
         """
         :return: A string list of the names of all available plugins by type.
         """
-        str_plugin_list = get_file_list(os.path.join(ROOT_PATH, 'plugins',
-                                                     plugin_type))
-        return str_plugin_list
+        return get_file_list(os.path.join(ROOT_PATH, 'plugins', plugin_type))
 
     def get_plugin_inst(self, plugin_type, plugin_name):
         """
         :return: An instance of a plugin.
         """
-        plugin_inst = factory('w3af.plugins.%s.%s' % (plugin_type, plugin_name))
+        plugin_inst = factory(f'w3af.plugins.{plugin_type}.{plugin_name}')
         plugin_inst.set_url_opener(self._w3af_core.uri_opener)
         plugin_inst.set_worker_pool(self._w3af_core.worker_pool)
-        
+
         if plugin_name in self._plugins_options[plugin_type].keys():
             custom_options = self._plugins_options[plugin_type][plugin_name]
             plugin_inst.set_options(custom_options)
@@ -255,7 +253,7 @@ class w3af_core_plugins(object):
         # This will init some plugins like mangle and output
         if plugin_type == 'attack' and not self.initialized:
             self.init_plugins()
-            
+
         return plugin_inst
 
     def get_quick_instance(self, plugin_type, plugin_name):
@@ -265,8 +263,10 @@ class w3af_core_plugins(object):
     def expand_all(self):
         for plugin_type, enabled_plugins in self._plugins_names_dict.iteritems():
             if 'all' in enabled_plugins:
-                file_list = [f for f in os.listdir(
-                    os.path.join(ROOT_PATH, 'plugins', plugin_type))]
+                file_list = list(
+                    os.listdir(os.path.join(ROOT_PATH, 'plugins', plugin_type))
+                )
+
                 all_plugins = [os.path.splitext(f)[0] for f in file_list
                                if os.path.splitext(f)[1] == '.py']
                 all_plugins.remove('__init__')

@@ -101,7 +101,7 @@ class w3afProxyHandler(BaseHTTPRequestHandler):
         """
         # See HTTPWrapperClass
         if hasattr(self.server, 'chainedHandler'):
-            base_path = "https://" + self.server.chainedHandler.path
+            base_path = f"https://{self.server.chainedHandler.path}"
             path = base_path + self.path
         else:
             path = self.path
@@ -219,10 +219,7 @@ class w3afProxyHandler(BaseHTTPRequestHandler):
         """
         self.log_request(code)
         if message is None:
-            if code in self.responses:
-                message = self.responses[code][0]
-            else:
-                message = ''
+            message = self.responses[code][0] if code in self.responses else ''
         if self.request_version != 'HTTP/0.9':
             self.wfile.write("%s %d %s\r\n" %
                              (self.protocol_version, code, message))
@@ -280,8 +277,7 @@ class w3afProxyHandler(BaseHTTPRequestHandler):
         Used by set_verify to check that the SSL certificate if valid.
         In our case, we always return True.
         """
-        msg = 'Got this certificate from remote site: %s'
-        om.out.debug(msg % cert.get_subject())
+        om.out.debug(f'Got this certificate from remote site: {cert.get_subject()}')
         # I don't check for certificates, for me, they are always ok.
         return True
 
@@ -368,8 +364,8 @@ class w3afProxyHandler(BaseHTTPRequestHandler):
         """
         I dont want messages written to stderr, please write them to the om.
         """
-        message = "Local proxy daemon handling request: %s - %s" % (
-            self.address_string(), format % args)
+        message = f"Local proxy daemon handling request: {self.address_string()} - {format % args}"
+
         om.out.debug(message)
 
 
@@ -479,7 +475,7 @@ class Proxy(Process):
             try:
                 # Tell the handler that he must quit
                 self._server.stop = True
-                conn = httplib.HTTPConnection(self._ip + ':' + str(self._port))
+                conn = httplib.HTTPConnection(f'{self._ip}:{str(self._port)}')
                 conn.request("QUIT", "/")
                 conn.getresponse()
                 om.out.debug('Sent QUIT request.')
@@ -501,12 +497,12 @@ class Proxy(Process):
         Starts the proxy daemon; usually this method isn't called directly. In
         most cases you'll call start()
         """
-        om.out.debug('Using proxy handler: %s.' % self._proxy_handler)
+        om.out.debug(f'Using proxy handler: {self._proxy_handler}.')
         self._proxy_handler._uri_opener = self._uri_opener
         self._proxy_handler._uri_opener._proxy_cert = self._proxy_cert
 
         # Starting to handle requests
-        message = 'Proxy server listening on %s:%s.' % (self._ip, self._port)
+        message = f'Proxy server listening on {self._ip}:{self._port}.'
         om.out.debug(message)
         self._server.w3afLayer = self
 
@@ -540,7 +536,7 @@ class ProxyServer(HTTPServer, SocketServer.ThreadingMixIn):
             except KeyboardInterrupt:
                 self.stop = True
                 break
-        
+
         msg = 'Exiting proxy server serve_forever(); stop() was successful.'
         om.out.debug(msg)
 
@@ -690,19 +686,15 @@ class SSLConnectionFile(object):
         if len(self._read_buffer) < amount:
             # We actually want to read ahead in order to have more data in the
             # buffer.
-            if amount <= 4096:
-                to_read = 4096
-            else:
-                to_read = amount
+            to_read = max(amount, 4096)
             self._read_buffer = self._sslCon.recv(to_read)
 
-        result = self._read_buffer[0:amount]
+        result = self._read_buffer[:amount]
         self._read_buffer = self._read_buffer[amount:]
         return result
 
     def write(self, data):
-        result = self._sslCon.send(data)
-        return result
+        return self._sslCon.send(data)
 
     def readline(self):
         result = ''

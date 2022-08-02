@@ -68,22 +68,18 @@ class w3af_core_profiles(object):
 
         # Save the enabled plugins
         for pType in self._w3af_core.plugins.get_plugin_types():
-            enabledPlugins = []
-            for pName in self._w3af_core.plugins.get_enabled_plugins(pType):
-                enabledPlugins.append(pName)
+            enabledPlugins = list(self._w3af_core.plugins.get_enabled_plugins(pType))
             new_profile.set_enabled_plugins(pType, enabledPlugins)
 
         # Save the profile options
         for pType in self._w3af_core.plugins.get_plugin_types():
             for pName in self._w3af_core.plugins.get_enabled_plugins(pType):
-                pOptions = self._w3af_core.plugins.get_plugin_options(
-                    pType, pName)
-                if pOptions:
+                if pOptions := self._w3af_core.plugins.get_plugin_options(
+                    pType, pName
+                ):
                     new_profile.set_plugin_options(pType, pName, pOptions)
 
-        # Save the profile targets
-        targets = cf.cf.get('targets')
-        if targets:
+        if targets := cf.cf.get('targets'):
             new_profile.set_target(' , '.join(t.url_string for t in targets))
 
         # Save the misc and http settings

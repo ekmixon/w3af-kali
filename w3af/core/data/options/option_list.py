@@ -45,16 +45,14 @@ class OptionList(object):
         return '<OptionList: ' + '|'.join([i.get_name() for i in self._internal_opt_list]) + '>'
 
     def __eq__(self, other):
-        if not isinstance(other, OptionList):
-            return False
-
-        return self._internal_opt_list == other._internal_opt_list
+        return (
+            self._internal_opt_list == other._internal_opt_list
+            if isinstance(other, OptionList)
+            else False
+        )
 
     def __contains__(self, item_name):
-        for o in self._internal_opt_list:
-            if o.get_name() == item_name:
-                return True
-        return False
+        return any(o.get_name() == item_name for o in self._internal_opt_list)
 
     def __getitem__(self, item_name):
         """
@@ -76,14 +74,12 @@ class OptionList(object):
         try:
             item_name = int(item_name)
         except:
-            # A string
             for o in self._internal_opt_list:
                 if o.get_name() == item_name:
                     return o
-            else:
-                msg = ('The OptionList doesn\'t contain an option with the'
-                       ' name: "%s"')
-                raise BaseFrameworkException(msg % item_name)
+            msg = ('The OptionList doesn\'t contain an option with the'
+                   ' name: "%s"')
+            raise BaseFrameworkException(msg % item_name)
         else:
             # An integer
             return self._internal_opt_list[item_name]

@@ -33,9 +33,9 @@ class TestHttpRequestParser(unittest.TestCase):
 
     def test_head_post_data(self):
         request_head = 'POST http://www.w3af.org/ HTTP/1.1\n' \
-                       'Host: www.w3af.org\n' \
-                       'Content-Length: 7\n' \
-                       'Content-Type: application/x-www-form-urlencoded\n'
+                           'Host: www.w3af.org\n' \
+                           'Content-Length: 7\n' \
+                           'Content-Type: application/x-www-form-urlencoded\n'
         post_data = 'foo=bar'
         fr = http_request_parser(request_head, post_data)
 
@@ -72,8 +72,8 @@ class TestHttpRequestParser(unittest.TestCase):
 
     def test_simple_GET_relative(self):
         http_request = 'GET / HTTP/1.1\n' \
-                       'Host: www.w3af.org\n' \
-                       'Foo: bar\n'
+                           'Host: www.w3af.org\n' \
+                           'Foo: bar\n'
 
         fr = http_request_parser(http_request, '')
         exp_headers = Headers([('Host', 'www.w3af.org'), ('Foo', 'bar')])
@@ -84,11 +84,11 @@ class TestHttpRequestParser(unittest.TestCase):
 
     def test_POST_repeated(self):
         request_head = 'POST http://www.w3af.org/ HTTP/1.1\n' \
-                       'Host: www.w3af.org\n' \
-                       'Content-Length: 7\n' \
-                       'Content-Type: application/x-www-form-urlencoded\n' \
-                       'Foo: spam\n' \
-                       'Foo: eggs\n'
+                           'Host: www.w3af.org\n' \
+                           'Content-Length: 7\n' \
+                           'Content-Type: application/x-www-form-urlencoded\n' \
+                           'Foo: spam\n' \
+                           'Foo: eggs\n'
         post_data = 'a=1&a=2'
         fr = http_request_parser(request_head, post_data)
 

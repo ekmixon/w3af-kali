@@ -39,7 +39,7 @@ def _return_html_encoded(encodingexc):
     en = encodingexc.end
     hex_encoded = "".join(hex(ord(c))[2:] for c in encodingexc.object[st:en])
 
-    return unicode('&#x' + hex_encoded), en
+    return unicode(f'&#x{hex_encoded}'), en
 
 
 def _return_escaped_char(encodingexc):
@@ -60,10 +60,7 @@ def _percent_encode(encodingexc):
     st = encodingexc.start
     en = encodingexc.end
 
-    return (
-        u'%s' % (urllib.quote(encodingexc.object[st:en].encode('utf8')),),
-        en
-    )
+    return f"{urllib.quote(encodingexc.object[st:en].encode('utf8'))}", en
 
 codecs.register_error(ESCAPED_CHAR, _return_escaped_char)
 codecs.register_error(PERCENT_ENCODE, _percent_encode)
@@ -78,7 +75,7 @@ def smart_unicode(s, encoding=DEFAULT_ENCODING, errors='strict',
     """
     if isinstance(s, unicode):
         return s
-    
+
     if isinstance(s, str):
         try:
             s = s.decode(encoding, errors)
@@ -96,22 +93,21 @@ def smart_unicode(s, encoding=DEFAULT_ENCODING, errors='strict',
                     s = s.decode(guessed_encoding, errors)
                 except UnicodeDecodeError:
                     s = s.decode(encoding, 'ignore')
-    else:
-        if hasattr(s, '__unicode__'):
-            try:
-                # Read the pyar thread "__unicode__ deberia tomar los mismos
-                # parametros que unicode() ?" to better understand why I can't
-                # pass encoding and errors parameters here:
-                s = unicode(s)
-            except UnicodeDecodeError:
-                # And why I'm doing it here:
-                s = str(s)
-                s = smart_unicode(s, encoding=encoding, errors=errors,
-                                  on_error_guess=on_error_guess)
-        else:
+    elif hasattr(s, '__unicode__'):
+        try:
+            # Read the pyar thread "__unicode__ deberia tomar los mismos
+            # parametros que unicode() ?" to better understand why I can't
+            # pass encoding and errors parameters here:
+            s = unicode(s)
+        except UnicodeDecodeError:
+            # And why I'm doing it here:
             s = str(s)
             s = smart_unicode(s, encoding=encoding, errors=errors,
                               on_error_guess=on_error_guess)
+    else:
+        s = str(s)
+        s = smart_unicode(s, encoding=encoding, errors=errors,
+                          on_error_guess=on_error_guess)
 
     return s
 

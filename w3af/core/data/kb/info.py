@@ -131,7 +131,6 @@ class Info(dict):
                      implementation before using it for anything other than
                      writing a report.
         """
-        attributes = {}
         long_description = None
         fix_guidance = None
         fix_effort = None
@@ -143,9 +142,7 @@ class Info(dict):
         references = None
         owasp_top_10_references = None
 
-        for k, v in self.iteritems():
-            attributes[str(k)] = str(v)
-
+        attributes = {str(k): str(v) for k, v in self.iteritems()}
         if self.has_db_details():
             long_description = self.get_long_description()
             fix_guidance = self.get_fix_guidance()
@@ -155,8 +152,8 @@ class Info(dict):
             cwe_ids = self.get_cwe_ids()
 
             # These require special treatment since they are iterators
-            wasc_urls = [u for u in self.get_wasc_urls()]
-            cwe_urls = [u for u in self.get_cwe_urls()]
+            wasc_urls = list(self.get_wasc_urls())
+            cwe_urls = list(self.get_cwe_urls())
 
             owasp_top_10_references = []
             for owasp_version, risk_id, ref in self.get_owasp_top_10_references():
@@ -171,28 +168,28 @@ class Info(dict):
                         'title': ref.title}
                 references.append(data)
 
-        _data = {'url': str(self.get_url()),
-                 'var': self.get_token_name(),
-                 'response_ids': self.get_id(),
-                 'vulndb_id': self.get_vulndb_id(),
-                 'name': self.get_name(),
-                 'desc': self.get_desc(with_id=False),
-                 'long_description': long_description,
-                 'fix_guidance': fix_guidance,
-                 'fix_effort': fix_effort,
-                 'tags': tags,
-                 'wasc_ids': wasc_ids,
-                 'wasc_urls': wasc_urls,
-                 'cwe_urls': cwe_urls,
-                 'cwe_ids': cwe_ids,
-                 'references': references,
-                 'owasp_top_10_references': owasp_top_10_references,
-                 'plugin_name': self.get_plugin_name(),
-                 'severity': self.get_severity(),
-                 'attributes': attributes,
-                 'highlight': list(self.get_to_highlight())}
-
-        return _data
+        return {
+            'url': str(self.get_url()),
+            'var': self.get_token_name(),
+            'response_ids': self.get_id(),
+            'vulndb_id': self.get_vulndb_id(),
+            'name': self.get_name(),
+            'desc': self.get_desc(with_id=False),
+            'long_description': long_description,
+            'fix_guidance': fix_guidance,
+            'fix_effort': fix_effort,
+            'tags': tags,
+            'wasc_ids': wasc_ids,
+            'wasc_urls': wasc_urls,
+            'cwe_urls': cwe_urls,
+            'cwe_ids': cwe_ids,
+            'references': references,
+            'owasp_top_10_references': owasp_top_10_references,
+            'plugin_name': self.get_plugin_name(),
+            'severity': self.get_severity(),
+            'attributes': attributes,
+            'highlight': list(self.get_to_highlight()),
+        }
 
     def get_severity(self):
         """
@@ -256,10 +253,10 @@ class Info(dict):
     def set_desc(self, desc):
         if not isinstance(desc, basestring):
             raise TypeError('Descriptions need to be strings.')
-        
+
         if len(desc) <= 15:
             raise ValueError('Description too short.')
-        
+
         self._desc = desc
 
     def get_desc(self, with_id=True):
@@ -274,7 +271,7 @@ class Info(dict):
             return
 
         if not DBVuln.is_valid_id(vulndb_id):
-            raise ValueError('Invalid vulnerability DB id: %s' % vulndb_id)
+            raise ValueError(f'Invalid vulnerability DB id: {vulndb_id}')
 
         self._vulndb_id = vulndb_id
 
@@ -367,26 +364,25 @@ class Info(dict):
             return self._vulndb
 
     def _get_desc_impl(self, what, with_id=True):
-        
-        if self._id is not None and self._id != 0 and with_id:
-            if not self._desc.strip().endswith('.'):
-                self._desc += '.'
 
-            # One request OR more than one request
-            desc_to_return = self._desc
-            if len(self._id) > 1:
-                id_range = self._convert_to_range_wrapper(self._id)
-                
-                desc_to_return += ' This %s was found in the requests' % what
-                desc_to_return += ' with ids %s.' % id_range
-
-            elif len(self._id) == 1:
-                desc_to_return += ' This %s was found in the request' % what
-                desc_to_return += ' with id %s.' % self._id[0]
-
-            return desc_to_return
-        else:
+        if self._id is None or self._id == 0 or not with_id:
             return self._desc
+        if not self._desc.strip().endswith('.'):
+            self._desc += '.'
+
+        # One request OR more than one request
+        desc_to_return = self._desc
+        if len(self._id) > 1:
+            id_range = self._convert_to_range_wrapper(self._id)
+
+            desc_to_return += f' This {what} was found in the requests'
+            desc_to_return += f' with ids {id_range}.'
+
+        elif len(self._id) == 1:
+            desc_to_return += f' This {what} was found in the request'
+            desc_to_return += f' with id {self._id[0]}.'
+
+        return desc_to_return
 
     def set_plugin_name(self, plugin_name):
         self._plugin_name = plugin_name
@@ -428,7 +424,7 @@ class Info(dict):
                 else:  # one-elem sequence
                     res.append(first)
                 if is_last_in_seq(num):
-                    res.append(_('and') + ' %s' % num)
+                    res.append(_('and') + f' {num}')
                     break
                 dist = 0
                 first = num
@@ -530,8 +526,7 @@ class Info(dict):
         elif isinstance(_id, int):
             self._id = [_id, ]
         else:
-            msg = 'IDs need to be lists of int or int not %s'
-            raise TypeError(msg % type(_id))
+            raise TypeError(f'IDs need to be lists of int or int not {type(_id)}')
 
     def get_id(self):
         """
@@ -613,6 +608,6 @@ class Info(dict):
         for s in str_match:
             if not isinstance(s, basestring):
                 raise TypeError('Only able to highlight strings.')
-            
+
             self._string_matches.add(s)
 

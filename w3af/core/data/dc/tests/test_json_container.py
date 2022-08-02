@@ -37,7 +37,7 @@ class TestJSONContainer(unittest.TestCase):
     
     def test_basic(self):
         jcont = JSONContainer(COMPLEX_OBJECT)
-        dcc_tokens = [(dcc, token) for dcc, token in jcont.iter_bound_tokens()]
+        dcc_tokens = list(jcont.iter_bound_tokens())
 
         for dcc, token in dcc_tokens:
             self.assertIsInstance(dcc, JSONContainer)
@@ -51,7 +51,7 @@ class TestJSONContainer(unittest.TestCase):
 
     def test_iter_bound_tokens_array(self):
         jcont = JSONContainer(ARRAY)
-        dcc_tokens = [(dcc, token) for dcc, token in jcont.iter_bound_tokens()]
+        dcc_tokens = list(jcont.iter_bound_tokens())
 
         for dcc, token in dcc_tokens:
             self.assertIsInstance(dcc, JSONContainer)
@@ -98,7 +98,7 @@ class TestJSONContainer(unittest.TestCase):
 
     def test_copy_container_with_token(self):
         jcont = JSONContainer(ARRAY)
-        dcc_tokens = [(dcc, token) for dcc, token in jcont.iter_bound_tokens()]
+        dcc_tokens = list(jcont.iter_bound_tokens())
 
         dc, token = dcc_tokens[0]
         self.assertIsNotNone(dc.get_token())

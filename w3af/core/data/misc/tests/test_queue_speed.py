@@ -30,25 +30,25 @@ class TestQueueSpeed(unittest.TestCase):
     
     def test_simple(self):
         q = QueueSpeed()
-        
+
         self.assertEqual(None, q.get_input_rpm())
         self.assertEqual(None, q.get_output_rpm())
-        
+
         for i in xrange(4):
             q.put(i)
             # 20 RPM
             time.sleep(3)
-        
+
         self.assertEqual(q.qsize(), 4)
-        
+
         self.assertGreater(q.get_input_rpm(), 19)
         self.assertLess(q.get_input_rpm(), 20)
 
-        for i in xrange(4):
+        for _ in xrange(4):
             q.get()
             # 60 RPM
             time.sleep(1)
-                        
+
         self.assertGreater(q.get_output_rpm(), 59)
         self.assertLess(q.get_output_rpm(), 60)
         self.assertEqual(q.qsize(), 0)
@@ -78,31 +78,31 @@ class TestQueueSpeed(unittest.TestCase):
     
     def test_exceptions(self):
         q = QueueSpeed(4)
-        
+
         self.assertEqual(None, q.get_input_rpm())
         self.assertEqual(None, q.get_output_rpm())
-        
+
         for i in xrange(4):
             q.put(i)
             # 20 RPM
             time.sleep(3)
-        
+
         for _ in xrange(10):
             self.assertRaises(Queue.Full, q.put_nowait, None)
-        
+
         self.assertEqual(q.qsize(), 4)
-        
+
         self.assertGreater(q.get_input_rpm(), 19)
         self.assertLess(q.get_input_rpm(), 20)
 
-        for i in xrange(4):
+        for _ in xrange(4):
             q.get()
             # 60 RPM
             time.sleep(1)
 
         for _ in xrange(10):
             self.assertRaises(Queue.Empty, q.get_nowait)
-        
+
         self.assertGreater(q.get_output_rpm(), 59)
         self.assertLess(q.get_output_rpm(), 60)
         self.assertEqual(q.qsize(), 0)

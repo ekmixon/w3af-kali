@@ -121,8 +121,7 @@ class DocumentParser(object):
         :param tags: The tag filter
         :return: Yield tags which match the filter
         """
-        for i in self._parser.get_tags_by_filter(tags, yield_text=yield_text):
-            yield i
+        yield from self._parser.get_tags_by_filter(tags, yield_text=yield_text)
 
     def get_clear_text_body(self):
         """
@@ -134,11 +133,7 @@ class DocumentParser(object):
         return self._parser.clear()
 
     def __repr__(self):
-        if self._parser:
-            klass = self._parser.__class__.__name__
-        else:
-            klass = None
-
+        klass = self._parser.__class__.__name__ if self._parser else None
         return '<%s DocumentParser for "%s">' % (klass, self._response_repr)
 
     __str__ = __repr__

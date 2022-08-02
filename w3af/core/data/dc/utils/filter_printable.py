@@ -36,11 +36,7 @@ def filter_non_printable(_str):
     for c in str(_str):
         if is_printable_chr(c):
             chars.append(c)
-        else:
-            if not chars:
-                chars.append(NON_PRINTABLE_REPLACE)
-
-            elif chars[-1] != NON_PRINTABLE_REPLACE:
-                chars.append(NON_PRINTABLE_REPLACE)
+        elif not chars or chars[-1] != NON_PRINTABLE_REPLACE:
+            chars.append(NON_PRINTABLE_REPLACE)
 
     return ''.join(chars)

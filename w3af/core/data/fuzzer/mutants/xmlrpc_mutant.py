@@ -57,9 +57,15 @@ class XmlRpcMutant(PostDataMutant):
         This is a very important method which is called in order to create
         mutants. Usually called from fuzzer.py module.
         """
-        if not isinstance(freq.get_raw_data(), XmlRpcContainer):
-            return []
-
-        return cls._create_mutants_worker(freq, cls, mutant_str_list,
-                                          fuzzable_param_list, append,
-                                          fuzzer_config)
+        return (
+            cls._create_mutants_worker(
+                freq,
+                cls,
+                mutant_str_list,
+                fuzzable_param_list,
+                append,
+                fuzzer_config,
+            )
+            if isinstance(freq.get_raw_data(), XmlRpcContainer)
+            else []
+        )

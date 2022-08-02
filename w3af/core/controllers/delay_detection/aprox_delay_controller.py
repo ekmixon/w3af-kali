@@ -100,22 +100,21 @@ class AproxDelayController(DelayMixIn):
         in place.
         """
         responses = []
-        
+
         multipliers_that_delay = []
-        
+
         for _ in xrange(3):
-            
+
             original_wait_time = self.get_original_time()
-            
+
             multiplier = self.find_delay_multiplier(original_wait_time,
                                                     responses)
             if multiplier is None:
                 return False, responses
-            else:
-                multipliers_that_delay.append(multiplier)
-                if len(set(multipliers_that_delay)) != 1:
-                    return False, responses
-        
+            multipliers_that_delay.append(multiplier)
+            if len(set(multipliers_that_delay)) != 1:
+                return False, responses
+
         return True, responses
     
     def find_delay_multiplier(self, original_wait_time, responses):

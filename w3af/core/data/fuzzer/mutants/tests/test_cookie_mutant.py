@@ -46,8 +46,8 @@ class TestCookieMutant(unittest.TestCase):
         self.assertEqual(str(m.get_cookie()), 'foo=abc; spam=eggs')
 
         expected_found_at = '"http://moth/", using HTTP method GET. The modified'\
-                            ' parameter was the session cookie with value: '\
-                            '"foo=abc; spam=eggs".'
+                                ' parameter was the session cookie with value: '\
+                                '"foo=abc; spam=eggs".'
         generated_found_at = m.found_at()
 
         self.assertEqual(generated_found_at, expected_found_at)

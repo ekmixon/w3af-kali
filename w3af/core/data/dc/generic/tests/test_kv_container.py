@@ -64,7 +64,7 @@ class TestKeyValueContainer(unittest.TestCase):
 
     def test_iter_tokens(self):
         dc = KeyValueContainer([(u'a', ['1']), (u'b', ['2', '3'])])
-        tokens = [t for t in dc.iter_tokens()]
+        tokens = list(dc.iter_tokens())
 
         EXPECTED_TOKENS = [('a', '1'), ('b', '2'), ('b', '3')]
         token_data = [(t.get_name(), t.get_value()) for t in tokens]
@@ -72,7 +72,7 @@ class TestKeyValueContainer(unittest.TestCase):
 
     def test_iter_bound_tokens(self):
         dc = KeyValueContainer([(u'a', ['1']), (u'b', ['2', '3'])])
-        dcc_tokens = [(dcc, t) for dcc, t in dc.iter_bound_tokens()]
+        dcc_tokens = list(dc.iter_bound_tokens())
 
         EXPECTED_TOKENS = [('a', '1'), ('b', '2'), ('b', '3')]
         token_data = [(t.get_name(), t.get_value()) for dcc, t in dcc_tokens]
@@ -102,7 +102,7 @@ class TestKeyValueContainer(unittest.TestCase):
 
     def test_iter_setters(self):
         dc = KeyValueContainer([(u'a', ['1']), (u'b', ['2', '3'])])
-        kv_setter = [(k, v, p, s) for (k, v, p, s) in dc.iter_setters()]
+        kv_setter = list(dc.iter_setters())
 
         EXPECTED_KEY_VALUES = [('a', '1', ('a', 0)),
                                ('b', '2', ('b', 0)),

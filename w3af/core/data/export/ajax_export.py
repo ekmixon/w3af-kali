@@ -24,8 +24,7 @@ from w3af.core.data.parsers.doc.http_request_parser import http_request_parser
 
 
 def ajax_escape_string(str_in):
-    str_out = str_in.replace('"', '\\"')
-    return str_out
+    return str_in.replace('"', '\\"')
 
 
 def ajax_export(request_string):
@@ -109,8 +108,11 @@ make the request fail */
 
     # And finally the post data (if any)
     if http_request.get_data() and http_request.get_data() != '\n':
-        res += 'var post_data = (<r><![CDATA[' + str(
-            http_request.get_data()) + ']]></r>).toString();\n'
+        res += (
+            f'var post_data = (<r><![CDATA[{str(http_request.get_data())}'
+            + ']]></r>).toString();\n'
+        )
+
         res += 'xmlhttp.send(post_data);\n'
     else:
         res += 'xmlhttp.send(null);\n'

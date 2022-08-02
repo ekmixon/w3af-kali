@@ -160,17 +160,17 @@ class TestInfo(unittest.TestCase):
 
         freq = FuzzableRequest(url)
         fuzzer_config = {}
-        
+
         created_mutants = QSMutant.create_mutants(freq, payloads, [], False,
                                                   fuzzer_config)
-                
+
         mutant = created_mutants[0]
-        
+
         inst = Info.from_mutant('TestCase', 'desc' * 30, 1, 'plugin_name',
                                 mutant)
-        
+
         self.assertIsInstance(inst, Info)
-        
+
         self.assertEqual(inst.get_uri(), mutant.get_uri())
         self.assertEqual(inst.get_url(), mutant.get_url())
         self.assertEqual(inst.get_method(), mutant.get_method())

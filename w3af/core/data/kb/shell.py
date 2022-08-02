@@ -101,9 +101,7 @@ class Shell(ExploitResult):
         #    Commands that are common to all shells:
         #
         if command.strip() == 'help':
-            help_command = None
-            if len(params) >= 1:
-                help_command = params[0]
+            help_command = params[0] if len(params) >= 1 else None
             return self.help(help_command)
 
         elif command == 'payload':
@@ -120,9 +118,6 @@ class Shell(ExploitResult):
             #
             return self._print_runnable_payloads()
 
-        #
-        #    Call the shell subclass method if needed
-        #
         elif hasattr(self, 'specific_user_input'):
             # forward to the plugin
             response = self.specific_user_input(command, params)

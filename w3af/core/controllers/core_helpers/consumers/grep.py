@@ -127,7 +127,7 @@ class grep(BaseConsumer):
         if self.TARGET_DOMAINS is None:
             self.TARGET_DOMAINS = cf.cf.get('target_domains')
 
-        if not response.get_url().get_domain() in self.TARGET_DOMAINS:
+        if response.get_url().get_domain() not in self.TARGET_DOMAINS:
             return False
 
         return self._already_analyzed.add(response.get_uri())

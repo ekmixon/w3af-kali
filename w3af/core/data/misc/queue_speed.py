@@ -51,30 +51,25 @@ class QueueSpeed(object):
 
     def _calculate_rpm(self, data):
         # Verify that I have everything I need to make the calculations
-        if len([True for (added, _) in data if added]) < 1:
+        if not [True for (added, _) in data if added]:
             return None
-        
+
         if len(data) < 2:
             return None
-        
+
         # Get the first logged item time, only a real item not a check made
         # by get_input_rpm / get_output_rpm
         first_item_time = [data_time for (added, data_time) in data if added][0]
-        
+
         # Get the last logged item time
         last_item_time = data[-1][1]
-        
+
         # Count all items that were logged
         all_items = len([True for (added, _) in data if added])
-        
+
         time_delta = last_item_time - first_item_time
 
-        if time_delta == 0:
-            # https://github.com/andresriancho/w3af/issues/342
-            return None
-
-        # Calculate RPM and return it
-        return 60.0 * all_items / time_delta
+        return None if time_delta == 0 else 60.0 * all_items / time_delta
 
     def get_input_rpm(self):
         self._add(False, self._input_data)
@@ -105,7 +100,4 @@ class QueueSpeed(object):
             return put_res
     
     def __getattr__(self, attr):
-        if attr in self.__dict__:
-            return getattr(self, attr)
-        
-        return getattr(self.q, attr)
+        return getattr(self, attr) if attr in self.__dict__ else getattr(self.q, attr)

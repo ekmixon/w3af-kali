@@ -67,10 +67,9 @@ class FileContentMutant(PostDataMutant):
         multipart_container = OnlyTokenFilesMultipartContainer(form)
         freq.set_data(multipart_container)
 
-        res = cls._create_mutants_worker(freq, cls, payload_list,
-                                         freq.get_file_vars(),
-                                         append, fuzzer_config)
-        return res
+        return cls._create_mutants_worker(
+            freq, cls, payload_list, freq.get_file_vars(), append, fuzzer_config
+        )
 
 
 class OnlyTokenFilesMultipartContainer(MultipartContainer):
@@ -91,12 +90,11 @@ class OnlyTokenFilesMultipartContainer(MultipartContainer):
                 if isinstance(val, (DataToken, FileDataToken)):
                     # Avoid double-wrapping
                     token = val
+                elif key in self.get_file_vars():
+                    fname = val.filename if hasattr(val, 'filename') else None
+                    token = FileDataToken(key, val, fname, ipath)
                 else:
-                    if key in self.get_file_vars():
-                        fname = val.filename if hasattr(val, 'filename') else None
-                        token = FileDataToken(key, val, fname, ipath)
-                    else:
-                        token = DataToken(key, val, ipath)
+                    token = DataToken(key, val, ipath)
 
                 setter(token)
                 self.token = token

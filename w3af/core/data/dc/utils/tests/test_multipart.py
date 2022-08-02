@@ -40,9 +40,9 @@ class TestMultipartEncode(unittest.TestCase):
         _, encoded = multipart_encode(_vars, _files, boundary='fakeboundary')
 
         EXPECTED = '--fakeboundary\r\nContent-Disposition: form-data; name="a"'\
-                   '\r\n\r\nb\r\n--fakeboundary\r\nContent-Disposition: form-data;'\
-                   ' name="file"; filename="test.txt"\r\nContent-Type: text/plain'\
-                   '\r\n\r\nfile content\r\n--fakeboundary--\r\n\r\n'
+                       '\r\n\r\nb\r\n--fakeboundary\r\nContent-Disposition: form-data;'\
+                       ' name="file"; filename="test.txt"\r\nContent-Type: text/plain'\
+                       '\r\n\r\nfile content\r\n--fakeboundary--\r\n\r\n'
         self.assertEqual(EXPECTED, encoded)
 
     def test_encode_file_null(self):

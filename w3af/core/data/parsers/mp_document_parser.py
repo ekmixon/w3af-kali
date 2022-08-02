@@ -249,14 +249,11 @@ def process_get_tags_by_filter(http_resp, tags, yield_text,
     document_parser = DocumentParser(http_resp)
 
     # Not all parsers have tags
-    if not hasattr(document_parser, 'get_tags_by_filter'):
-        return []
-
-    filtered_tags = []
-    for tag in document_parser.get_tags_by_filter(tags, yield_text=yield_text):
-        filtered_tags.append(tag)
-
-    return filtered_tags
+    return (
+        list(document_parser.get_tags_by_filter(tags, yield_text=yield_text))
+        if hasattr(document_parser, 'get_tags_by_filter')
+        else []
+    )
 
 
 def process_document_parser(http_resp, processes, hash_string, debug):

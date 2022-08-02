@@ -36,19 +36,19 @@ class TestPlainContainer(unittest.TestCase):
 
     def test_iter_tokens(self):
         dc = PlainContainer('abc', 'text/plain')
-        tokens = [t for t in dc.iter_tokens()]
+        tokens = list(dc.iter_tokens())
 
         self.assertEqual(tokens, [])
 
     def test_iter_bound_tokens(self):
         dc = PlainContainer('abc', 'text/plain')
-        tokens = [t for t in dc.iter_bound_tokens()]
+        tokens = list(dc.iter_bound_tokens())
 
         self.assertEqual(tokens, [])
 
     def test_iter_setters(self):
         dc = PlainContainer('abc', 'text/plain')
-        tokens = [t for t in dc.iter_setters()]
+        tokens = list(dc.iter_setters())
 
         self.assertEqual(tokens, [])
 

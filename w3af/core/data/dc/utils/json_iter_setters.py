@@ -37,8 +37,7 @@ TO_WRAP_OBJS = (int, float, basestring)
 def json_iter_setters(arbitrary_python_obj):
     marbitrary_python_obj = to_mutable(arbitrary_python_obj)
 
-    for k, v, s in _json_iter_setters(marbitrary_python_obj):
-        yield k, v, s
+    yield from _json_iter_setters(marbitrary_python_obj)
 
 
 def to_mutable(arbitrary_python_obj):
@@ -125,21 +124,16 @@ def _json_iter_setters(marbitrary_python_obj, key_names=[]):
             yield '-'.join(key_names), value, marbitrary_python_obj.set_value
 
         elif isinstance(value, DataToken):
-            for k, v, s in _json_iter_setters(value, key_names=key_names):
-                yield k, v, s
+            yield from _json_iter_setters(value, key_names=key_names)
         else:
-            for k, v, s in _json_iter_setters(value, key_names=key_names):
-                yield k, v, s
-
+            yield from _json_iter_setters(value, key_names=key_names)
     elif isinstance(marbitrary_python_obj, list):
         for idx, list_item in enumerate(marbitrary_python_obj):
             array_key_names = key_names[:]
             array_key_names.append(KEY_ARRAY)
             array_key_names.append(str(idx))
 
-            for k, v, s in _json_iter_setters(list_item,
-                                              key_names=array_key_names):
-                yield k, v, s
+            yield from _json_iter_setters(list_item, key_names=array_key_names)
 
     elif isinstance(marbitrary_python_obj, dict):
         for key, value in marbitrary_python_obj.iteritems():
@@ -147,8 +141,7 @@ def _json_iter_setters(marbitrary_python_obj, key_names=[]):
             array_key_names.append(KEY_OBJECT)
             array_key_names.append(key)
 
-            for k, v, s in _json_iter_setters(value, key_names=array_key_names):
-                yield k, v, s
+            yield from _json_iter_setters(value, key_names=array_key_names)
 
 
 def json_complex_str(arbitrary_json):
@@ -158,6 +151,6 @@ def json_complex_str(arbitrary_json):
         elif isinstance(obj, MutableWrapper):
             return obj.get_value()
 
-        raise TypeError(repr(obj) + " is not JSON serializable")
+        raise TypeError(f"{repr(obj)} is not JSON serializable")
 
     return json.dumps(arbitrary_json, default=encode_complex)

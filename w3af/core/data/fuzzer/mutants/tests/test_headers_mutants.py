@@ -75,7 +75,7 @@ class TestHeadersMutant(unittest.TestCase):
                         Headers([('Referer', 'def')])]
 
         created_dcs = [i.get_dc() for i in created_mutants]
-        created_strs = set([str(i.get_dc()) for i in created_mutants])
+        created_strs = {str(i.get_dc()) for i in created_mutants}
 
         self.assertEqual(created_dcs, expected_dcs)
         self.assertEqual(created_strs, expected_strs)

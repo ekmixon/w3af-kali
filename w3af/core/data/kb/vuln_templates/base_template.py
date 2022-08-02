@@ -68,13 +68,13 @@ class BaseTemplate(Configurable):
 
         d = 'Query string or postdata parameters in url-encoded form'
         h = 'If the HTTP method is GET, the data will be sent in the ' \
-            'query-string otherwise it will be sent using the HTTP request\'s' \
-            ' body. If the vulnerability requires the request to be sent using'\
-            ' multipart-forms, the exploit will convert this url-encoded data' \
-            ' into that format.\n\n'\
-            'Enter the original parameter value, not the one which triggers'\
-            ' the vulnerability. Correct input looks like "id=2" not like'\
-            ' "id=2;cat /etc/passwd".'
+                'query-string otherwise it will be sent using the HTTP request\'s' \
+                ' body. If the vulnerability requires the request to be sent using'\
+                ' multipart-forms, the exploit will convert this url-encoded data' \
+                ' into that format.\n\n'\
+                'Enter the original parameter value, not the one which triggers'\
+                ' the vulnerability. Correct input looks like "id=2" not like'\
+                ' "id=2;cat /etc/passwd".'
         o = opt_factory('data', self.data, d, 'string', help=h)
         ol.add(o)
 
@@ -83,7 +83,7 @@ class BaseTemplate(Configurable):
         ol.add(o)
 
         d = 'Vulnerable parameter (needs to be one of the entered in the data'\
-            ' field).'
+                ' field).'
         o = opt_factory('vulnerable_parameter', self.vulnerable_parameter, d,
                         'string')
         ol.add(o)
@@ -146,13 +146,16 @@ class BaseTemplate(Configurable):
         :return: A vulnerability with some pre-configured settings
         """
         desc = 'This vulnerability was added to the knowledge-base by the'\
-               ' user and represents a "%s" vulnerability.'
+                   ' user and represents a "%s" vulnerability.'
         desc %= self.get_vulnerability_name()
-        
-        v = Vuln('Manually added vulnerability', desc, severity.HIGH,
-                 self.get_vuln_id(), 'manual')
-        
-        return v
+
+        return Vuln(
+            'Manually added vulnerability',
+            desc,
+            severity.HIGH,
+            self.get_vuln_id(),
+            'manual',
+        )
 
     def create_vuln(self):
         """

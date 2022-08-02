@@ -45,8 +45,8 @@ class TestURLPartsMutant(unittest.TestCase):
                          u'http://www.w3af.com/ping%21/bar')
 
         expected_found_at = '"http://www.w3af.com/ping%21/bar", using HTTP method'\
-                            ' GET. The modified parameter was the URL path, with'\
-                            ' value: "ping!".'
+                                ' GET. The modified parameter was the URL path, with'\
+                                ' value: "ping!".'
         generated_found_at = m.found_at()
 
         self.assertEqual(generated_found_at, expected_found_at)
@@ -126,6 +126,6 @@ class TestURLPartsMutant(unittest.TestCase):
                          'http://www.w3af.com/foo/http%3A%2F%2F127.0.0.1%3A8015%2Ftest%2F',
                          'http://www.w3af.com/foo/http%253A%252F%252F127.0.0.1%253A8015%252Ftest%252F']
 
-        generated_urls = set([m.get_url().url_string for m in generated_mutants])
+        generated_urls = {m.get_url().url_string for m in generated_mutants}
 
         self.assertEqual(set(expected_urls), generated_urls)

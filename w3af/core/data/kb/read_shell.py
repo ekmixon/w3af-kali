@@ -88,11 +88,7 @@ class ReadShell(Shell):
                                the remote file.
         :return: The message to show to the user.
         """
-        remote_content = self.read(remote_filename)
-
-        if not remote_content:
-            return 'Remote file does not exist.'
-        else:
+        if remote_content := self.read(remote_filename):
             try:
                 fh = file(local_filename, 'w')
             except:
@@ -101,6 +97,9 @@ class ReadShell(Shell):
                 fh.write(remote_content)
                 fh.close()
                 return 'Success.'
+
+        else:
+            return 'Remote file does not exist.'
 
     def specific_user_input(self, command, parameters, return_err=True):
         """
@@ -118,16 +117,12 @@ class ReadShell(Shell):
         #    Read remote files
         #
         if command == 'read':
-            if len(parameters) == 1:
-                filename = parameters[0]
-                return self.read(filename)
-            else:
+            if len(parameters) != 1:
                 return 'Only one parameter is expected. Usage examples: ' \
-                       '"read /etc/passwd", "read \'/var/foo bar/spam.eggs\'"'
+                           '"read /etc/passwd", "read \'/var/foo bar/spam.eggs\'"'
 
-        #
-        #    Download remote files
-        #
+            filename = parameters[0]
+            return self.read(filename)
         elif command == 'download' and len(parameters) == 2:
             remote_filename = parameters[0]
             local_filename = parameters[1]
@@ -135,7 +130,7 @@ class ReadShell(Shell):
 
         elif return_err:
             return 'Command "%s" not found. Please type "help".' % command
-        
+
         return
 
     def identify_os(self):

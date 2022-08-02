@@ -110,14 +110,11 @@ class JSONContainer(DataContainer):
         return json_complex_str(self._json)
 
     def __repr__(self):
-        return '<JSONContainer (token: %s)>' % self.get_token()
+        return f'<JSONContainer (token: {self.get_token()})>'
 
     def token_filter(self, token_path, token_value):
         # Only return tokens for strings
-        if isinstance(token_value, basestring):
-            return True
-
-        return False
+        return isinstance(token_value, basestring)
 
     def iter_setters(self):
         """
@@ -142,16 +139,15 @@ class JSONContainer(DataContainer):
         """
         :return: A string with a short printable representation of self
         """
-        if self.get_token() is not None:
-            # I want to show the token variable and value in the output
-            token = self.get_token()
-            dt_str = '%s=%s' % (filter_non_printable(token.get_name()),
-                                filter_non_printable(token.get_value()))
-            return '...%s...' % dt_str[:self.MAX_PRINTABLE-6]
-        else:
+        if self.get_token() is None:
             # I'll simply show the first N parameter and values until the
             # MAX_PRINTABLE is achieved
             return filter_non_printable(str(self))[:self.MAX_PRINTABLE]
+        # I want to show the token variable and value in the output
+        token = self.get_token()
+        dt_str = f'{filter_non_printable(token.get_name())}={filter_non_printable(token.get_value())}'
+
+        return f'...{dt_str[:self.MAX_PRINTABLE-6]}...'
 
     def get_headers(self):
         return [('Content-Type', self.JSON_CONTENT_TYPE)]

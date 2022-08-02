@@ -114,7 +114,7 @@ class Vuln(Info):
 
     def set_severity(self, severity):
         if severity not in (INFORMATION, LOW, MEDIUM, HIGH):
-            raise ValueError('Invalid severity value: %s' % severity)
+            raise ValueError(f'Invalid severity value: {severity}')
 
         self._severity = severity
 

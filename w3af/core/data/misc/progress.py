@@ -55,11 +55,7 @@ class Progress(object):
         0.01
 
         """
-        if self._current_value == self._max_value:
-            # TODO: Find a way to show progress!
-            #om.out.error('Current value can never be greater than max value!')
-            pass
-        else:
+        if self._current_value != self._max_value:
             # inc the counter
             self._current_value += 1
             self._update_eta()
@@ -78,7 +74,7 @@ class Progress(object):
             except ZeroDivisionError:
                 # I should never get here...
                 time_for_all_requests = time_already_elapsed * \
-                    self._max_value * 2
+                        self._max_value * 2
             else:
                 self._eta = time_for_all_requests - time_already_elapsed
 
@@ -99,11 +95,7 @@ class Progress(object):
         0.0
         """
         # This if is to avoid division by zero
-        if self._max_value == 0:
-            return 0.0
-
-        # This returns the %
-        return self._current_value / self._max_value
+        return 0.0 if self._max_value == 0 else self._current_value / self._max_value
 
     def stop(self):
         """
@@ -121,17 +113,15 @@ class Progress(object):
         """
         if not self._eta:
             return 0, 0, 0, 0
-        else:
-            # recalculate the value
-            self._update_eta()
+        # recalculate the value
+        self._update_eta()
 
-            temp = float()
-            temp = float(self._eta) / (60 * 60 * 24)
-            d = int(temp)
-            temp = (temp - d) * 24
-            h = int(temp)
-            temp = (temp - h) * 60
-            m = int(temp)
-            temp = (temp - m) * 60
-            sec = temp
-            return d, h, m, sec
+        temp = float()
+        temp = float(self._eta) / (60 * 60 * 24)
+        d = int(temp)
+        temp = (temp - d) * 24
+        h = int(temp)
+        temp = (temp - h) * 60
+        m = int(temp)
+        temp = (temp - m) * 60
+        return d, h, m, temp

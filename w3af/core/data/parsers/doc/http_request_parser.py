@@ -41,8 +41,7 @@ def check_version_syntax(version):
         msg = 'The HTTP request has an invalid version token: "%s"'
         raise BaseFrameworkException(msg % version)
 
-    elif len(splitted_version) == 2:
-
+    else:
         if splitted_version[0].lower() != 'http':
             msg = 'The HTTP request has an invalid HTTP token in the version'\
                   ' specification: "%s"'
@@ -72,12 +71,14 @@ def check_uri_syntax(uri, host=None):
         path = '/'
 
     if scheme not in supported_schemes or not domain:
-        msg = 'You have to specify the complete URI, including the protocol'
-        msg += ' and the host. Invalid URI: %s.'
+        msg = (
+            'You have to specify the complete URI, including the protocol'
+            + ' and the host. Invalid URI: %s.'
+        )
+
         raise BaseFrameworkException(msg % uri)
 
-    res = urlparse.urlunparse((scheme, domain, path, params, qs, fragment))
-    return res
+    return urlparse.urlunparse((scheme, domain, path, params, qs, fragment))
 
 
 def http_request_parser(head, postdata):

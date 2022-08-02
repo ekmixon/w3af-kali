@@ -98,11 +98,7 @@ class ExecShell(Shell):
                                the remote file.
         :return: The message to show to the user.
         """
-        remote_content = self.read(remote_filename)
-
-        if not remote_content:
-            return 'Remote file does not exist.'
-        else:
+        if remote_content := self.read(remote_filename):
             try:
                 fh = file(local_filename, 'w')
             except:
@@ -111,6 +107,9 @@ class ExecShell(Shell):
                 fh.write(remote_content)
                 fh.close()
                 return 'Success.'
+
+        else:
+            return 'Remote file does not exist.'
 
     def upload(self, local_filename, remote_filename):
         """
@@ -150,16 +149,15 @@ class ExecShell(Shell):
 
         if not self._transfer_handler.can_transfer():
             return 'Failed to transfer, the transfer handler failed.'
-        else:
-            estimatedTime = self._transfer_handler.estimate_transfer_time(
-                len(file_content))
-            om.out.debug('The file transfer will take "' + str(
-                estimatedTime) + '" seconds.')
+        estimatedTime = self._transfer_handler.estimate_transfer_time(
+            len(file_content))
+        om.out.debug('The file transfer will take "' + str(
+            estimatedTime) + '" seconds.')
 
-            self._transfer_handler.transfer(file_content, remote_filename)
-            om.out.debug('Finished file transfer.')
+        self._transfer_handler.transfer(file_content, remote_filename)
+        om.out.debug('Finished file transfer.')
 
-            return 'File upload was successful.'
+        return 'File upload was successful.'
 
     def specific_user_input(self, command, parameters):
         """
@@ -175,36 +173,22 @@ class ExecShell(Shell):
         #    Read remote files
         #
         if command == 'read':
-            if len(parameters) == 1:
-                filename = parameters[0]
-                return self.read(filename)
-            else:
+            if len(parameters) != 1:
                 return 'Only one parameter is expected. Usage examples: ' \
-                       '"read /etc/passwd", "read \'/var/foo bar/spam.eggs\'"'
+                           '"read /etc/passwd", "read \'/var/foo bar/spam.eggs\'"'
 
-        #
-        #    Write remote files
-        #
+            filename = parameters[0]
+            return self.read(filename)
         elif command == 'write' and len(parameters) == 2:
             filename = parameters[0]
             content = parameters[1]
             return self.write(filename, content)
 
-        #
-        #    Upload local files to the remote system
-        #
         elif command == 'upload' and len(parameters) == 2:
             remote_filename = parameters[1]
             local_filename = parameters[0]
             return self.upload(local_filename, remote_filename)
 
-        #
-        #    Commands that are common to shells that can EXECUTE commands:
-        #
-
-        #
-        #    Execute the command in the remote host
-        #
         elif command in ['e', 'exec', 'execute']:
             return self.execute(' '.join(parameters))
 
@@ -219,10 +203,7 @@ class ExecShell(Shell):
                      - del %s
                  The %s will be replaced by the file to be read.
         """
-        if self._rOS == 'windows':
-            return 'del %s'
-        else:
-            return 'rm -rf %s'
+        return 'del %s' if self._rOS == 'windows' else 'rm -rf %s'
 
     def unlink(self, filename):
         """
@@ -243,15 +224,8 @@ class ExecShell(Shell):
                      - type %s
                  The %s will be replaced by the file to be read.
         """
-        if self._rOS == 'windows':
-            command = 'type %s'
-        else:
-            command = 'cat %s'
-
-        if ' ' in filename:
-            return command.replace('%s', '"%s"')
-
-        return command
+        command = 'type %s' if self._rOS == 'windows' else 'cat %s'
+        return command.replace('%s', '"%s"') if ' ' in filename else command
 
     @read_debug
     def read(self, filename):

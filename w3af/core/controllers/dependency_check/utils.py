@@ -29,8 +29,7 @@ def verify_python_version():
     major, minor, micro, releaselevel, serial = sys.version_info
     if major == 2:
         if minor != 7:
-            msg = 'Error: Python 2.%s found but Python 2.7 required.'
-            print(msg % minor)
+            print(f'Error: Python 2.{minor} found but Python 2.7 required.')
     elif major > 2:
         msg = 'It seems that you are running Python 3k, please let us know if' \
               ' w3af works as expected at w3af-develop@lists.sourceforge.net !'
@@ -39,7 +38,4 @@ def verify_python_version():
 
 
 def running_in_virtualenv():
-    if hasattr(sys, 'real_prefix'):
-        return True
-
-    return False
+    return bool(hasattr(sys, 'real_prefix'))

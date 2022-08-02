@@ -15,9 +15,9 @@ def main():
     """
     output = file(OUTPUT_FILE, 'w')
     write = lambda s: output.write('%s\n' % s)
-    
+
     write('<html>')
-    write('<title>%s</title>' % SOME_TEXT)
+    write(f'<title>{SOME_TEXT}</title>')
 
     write('<body>')
 
@@ -58,7 +58,7 @@ def main():
         write('<div id="id-%s">' % i)
         write('<a href="/deep-div-%s">%s</a>' % (i, SOME_TEXT))
 
-    for i in xrange(5000):
+    for _ in xrange(5000):
         write('<p>')
         write(SOME_TEXT)
         write('</p>')
@@ -67,7 +67,7 @@ def main():
     #
     #   Some scripts at the end
     #
-    for i in xrange(50):
+    for _ in xrange(50):
         write('<script><!-- code(); --></script>')
 
     write('</body>')

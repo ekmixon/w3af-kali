@@ -94,7 +94,7 @@ class fingerprint_404(object):
         #
         self._uri_opener = None
         self._worker_pool = None
-        
+
         #
         #   Internal variables
         #
@@ -138,23 +138,35 @@ class fingerprint_404(object):
         #   the 404 depends on the handler, so I want to make sure that I catch
         #   the 404 for each one
         #
-        handlers = {'py', 'php', 'asp', 'aspx', 'do', 'jsp', 'rb', 'do',
-                    'gif', 'htm', 'pl', 'cgi', 'xhtml', 'htmls', 'foobar'}
+        handlers = {
+            'py',
+            'php',
+            'asp',
+            'aspx',
+            'jsp',
+            'rb',
+            'do',
+            'gif',
+            'htm',
+            'pl',
+            'cgi',
+            'xhtml',
+            'htmls',
+            'foobar',
+        }
+
         if extension:
             handlers.add(extension)
 
         test_urls = []
 
         for extension in handlers:
-            rand_alnum_file = rand_alnum(8) + '.' + extension
+            rand_alnum_file = f'{rand_alnum(8)}.{extension}'
             url404 = domain_path.url_join(rand_alnum_file)
             test_urls.append(url404)
 
         imap_unordered = self._worker_pool.imap_unordered
-        not_exist_resp_lst = []
-        
-        for not_exist_resp in imap_unordered(self._send_404, test_urls):
-            not_exist_resp_lst.append(not_exist_resp)
+        not_exist_resp_lst = list(imap_unordered(self._send_404, test_urls))
 
         #
         # I have the 404 responses in not_exist_resp_lst, but maybe they
@@ -257,7 +269,7 @@ class fingerprint_404(object):
         #    then we're return False!
         #
         if domain_path in self._directory_uses_404_codes and \
-        http_response.get_code() != 404:
+            http_response.get_code() != 404:
             return False
 
         #
@@ -425,7 +437,7 @@ class fingerprint_404(object):
 
         final_result = mod_filename
         if extension is not None:
-            final_result += '.%s' % extension
+            final_result += f'.{extension}'
 
         return final_result
 
@@ -445,20 +457,19 @@ class fingerprint_404(object):
         :return: True if the original response was a 404 !
         """
         response_url = http_response.get_url()
-        filename = response_url.get_file_name()
-        if not filename:
-            relative_url = '../%s/' % rand_alnum(8)
-            url_404 = response_url.url_join(relative_url)
-        else:
+        if filename := response_url.get_file_name():
             relative_url = self._generate_404_filename(filename)
             url_404 = response_url.copy()
             url_404.set_file_name(relative_url)
 
+        else:
+            relative_url = f'../{rand_alnum(8)}/'
+            url_404 = response_url.url_join(relative_url)
         response_404 = self._send_404(url_404)
         clean_response_404_body = get_clean_body(response_404)
 
         if response_404.get_code() == 404 and \
-        url_404.get_domain_path() not in self._directory_uses_404_codes:
+            url_404.get_domain_path() not in self._directory_uses_404_codes:
             self._directory_uses_404_codes.add(url_404.get_domain_path())
 
         return fuzzy_equal(clean_response_404_body, clean_resp_body,

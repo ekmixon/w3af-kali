@@ -35,10 +35,7 @@ SAVE_PSUTIL_PTR = []
 def user_wants_psutil():
     _should_profile = os.environ.get('W3AF_PSUTILS', '0')
 
-    if _should_profile.isdigit() and int(_should_profile) == 1:
-        return True
-
-    return False
+    return bool(_should_profile.isdigit() and int(_should_profile) == 1)
 
 
 if user_wants_psutil():
@@ -112,7 +109,7 @@ def dump_psutil():
                    'Processes': process_info,
                    'ps_mem': ps_mem_data,
                    'Thread CPU usage': get_threads_cpu_percent()}
-    
+
     json.dump(psutil_data, file(output_file, 'w'), indent=4, sort_keys=True)
 
 

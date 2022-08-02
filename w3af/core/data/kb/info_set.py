@@ -35,10 +35,7 @@ def sample_count(value):
     len_uris = len(value)
     if len_uris == 1:
         return 'ten'
-    if len_uris > 10:
-        return 'ten'
-    else:
-        return human_number(len_uris)
+    return 'ten' if len_uris > 10 else human_number(len_uris)
 
 
 class InfoSet(object):
@@ -134,7 +131,7 @@ class InfoSet(object):
                    'id': self.get_id(),
                    'method': self.get_method(),
                    'plugin': self.get_plugin_name()}
-        context.update(self.first_info.items())
+        context |= self.first_info.items()
 
         template = self.JINJA2_ENV.from_string(textwrap.dedent(self.TEMPLATE))
         return template.render(context)
@@ -152,18 +149,14 @@ class InfoSet(object):
         """
         :return: All the URLs associated with the instances stored in self.infos
         """
-        all_urls = []
-        for info in self.infos:
-            all_urls.append(info.get_url())
+        all_urls = [info.get_url() for info in self.infos]
         return list(set(all_urls))
 
     def get_uris(self):
         """
         :return: All the URIs associated with the instances stored in self.infos
         """
-        all_urls = []
-        for info in self.infos:
-            all_urls.append(info.get_uri())
+        all_urls = [info.get_uri() for info in self.infos]
         return list(set(all_urls))
 
     def get_mutant(self):
@@ -187,7 +180,6 @@ class InfoSet(object):
                      implementation before using it for anything other than
                      writing a report.
         """
-        attributes = {}
         long_description = None
         fix_guidance = None
         fix_effort = None
@@ -199,9 +191,7 @@ class InfoSet(object):
         references = None
         owasp_top_10_references = None
 
-        for k, v in self.first_info.iteritems():
-            attributes[str(k)] = str(v)
-
+        attributes = {str(k): str(v) for k, v in self.first_info.iteritems()}
         if self.has_db_details():
             long_description = self.get_long_description()
             fix_guidance = self.get_fix_guidance()
@@ -211,8 +201,8 @@ class InfoSet(object):
             cwe_ids = self.get_cwe_ids()
 
             # These require special treatment since they are iterators
-            wasc_urls = [u for u in self.get_wasc_urls()]
-            cwe_urls = [u for u in self.get_cwe_urls()]
+            wasc_urls = list(self.get_wasc_urls())
+            cwe_urls = list(self.get_cwe_urls())
 
             owasp_top_10_references = []
             for owasp_version, risk_id, ref in self.get_owasp_top_10_references():
@@ -227,29 +217,29 @@ class InfoSet(object):
                         'title': ref.title}
                 references.append(data)
 
-        _data = {'url': str(self.get_url()),
-                 'urls': [str(u) for u in self.get_urls()],
-                 'var': self.get_token_name(),
-                 'response_ids': self.get_id(),
-                 'vulndb_id': self.get_vulndb_id(),
-                 'name': self.get_name(),
-                 'desc': self.get_desc(with_id=False),
-                 'long_description': long_description,
-                 'fix_guidance': fix_guidance,
-                 'fix_effort': fix_effort,
-                 'tags': tags,
-                 'wasc_ids': wasc_ids,
-                 'wasc_urls': wasc_urls,
-                 'cwe_urls': cwe_urls,
-                 'cwe_ids': cwe_ids,
-                 'references': references,
-                 'owasp_top_10_references': owasp_top_10_references,
-                 'plugin_name': self.get_plugin_name(),
-                 'severity': self.get_severity(),
-                 'attributes': attributes,
-                 'highlight': list(self.get_to_highlight())}
-
-        return _data
+        return {
+            'url': str(self.get_url()),
+            'urls': [str(u) for u in self.get_urls()],
+            'var': self.get_token_name(),
+            'response_ids': self.get_id(),
+            'vulndb_id': self.get_vulndb_id(),
+            'name': self.get_name(),
+            'desc': self.get_desc(with_id=False),
+            'long_description': long_description,
+            'fix_guidance': fix_guidance,
+            'fix_effort': fix_effort,
+            'tags': tags,
+            'wasc_ids': wasc_ids,
+            'wasc_urls': wasc_urls,
+            'cwe_urls': cwe_urls,
+            'cwe_ids': cwe_ids,
+            'references': references,
+            'owasp_top_10_references': owasp_top_10_references,
+            'plugin_name': self.get_plugin_name(),
+            'severity': self.get_severity(),
+            'attributes': attributes,
+            'highlight': list(self.get_to_highlight()),
+        }
 
     def get_method(self):
         return self.first_info.get_method()
@@ -303,10 +293,7 @@ class InfoSet(object):
                  the user, we can't use id() to know if two info objects are
                  the same or not.
         """
-        concat_all = ''
-
-        for info in self.infos:
-            concat_all += info.get_uniq_id()
+        concat_all = ''.join(info.get_uniq_id() for info in self.infos)
 
         return str(hash(concat_all))
 

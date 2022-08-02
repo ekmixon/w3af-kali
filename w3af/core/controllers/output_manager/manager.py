@@ -134,15 +134,14 @@ class OutputManager(Process):
                 # This is added at fresh_output_manager_inst
                 break
 
-            else:
-                args, kwargs = work_unit
-                #
-                #    Please note that error handling is done inside:
-                #        _call_output_plugins_action
-                #
-                self._call_output_plugins_action(*args, **kwargs)
+            args, kwargs = work_unit
+            #
+            #    Please note that error handling is done inside:
+            #        _call_output_plugins_action
+            #
+            self._call_output_plugins_action(*args, **kwargs)
 
-                self.in_queue.task_done()
+            self.in_queue.task_done()
 
     def end_output_plugins(self):
         self.process_all_messages()
@@ -317,7 +316,7 @@ class OutputManager(Process):
             str_req_plugins.remove('__init__')
 
             for plugin_name in str_req_plugins:
-                plugin = factory('w3af.plugins.output.' + plugin_name)
+                plugin = factory(f'w3af.plugins.output.{plugin_name}')
 
                 if plugin_name in self._plugin_options.keys():
                     plugin.set_options(self._plugin_options[plugin_name])
@@ -326,7 +325,7 @@ class OutputManager(Process):
                 self._output_plugin_instances.append(plugin)
 
         else:
-            plugin = factory('w3af.plugins.output.' + output_plugin_name)
+            plugin = factory(f'w3af.plugins.output.{output_plugin_name}')
             if output_plugin_name in self._plugin_options.keys():
                 plugin.set_options(self._plugin_options[output_plugin_name])
 

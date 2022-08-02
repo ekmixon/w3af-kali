@@ -143,10 +143,8 @@ def normalize_html(data):
 def crop_js(byte_chunk, context='tag'):
     if context == 'tag':
         return ByteChunk(byte_chunk.nhtml[byte_chunk.nhtml.lower().rfind('<script')+1:])
-    else:
-        attr_data = byte_chunk.html_attr
-        if attr_data:
-            return ByteChunk(byte_chunk.nhtml[attr_data[2]:])
+    if attr_data := byte_chunk.html_attr:
+        return ByteChunk(byte_chunk.nhtml[attr_data[2]:])
 
     return byte_chunk
 
@@ -154,10 +152,8 @@ def crop_js(byte_chunk, context='tag'):
 def crop_style(byte_chunk, context='tag'):
     if context == 'tag':
         return ByteChunk(byte_chunk.nhtml[byte_chunk.nhtml.lower().rfind('<style')+1:])
-    else:
-        attr_data = byte_chunk.html_attr
-        if attr_data:
-            return ByteChunk(byte_chunk.nhtml[attr_data[2]:])
+    if attr_data := byte_chunk.html_attr:
+        return ByteChunk(byte_chunk.nhtml[attr_data[2]:])
 
 
 def inside_js(meth):
@@ -193,13 +189,11 @@ def inside_style(meth):
 
 
 def inside_html(meth):
-    
+
     @wraps(meth)
     def wrap(self, byte_chunk):
-        if not byte_chunk.inside_html:
-            return False
-        return meth(self, byte_chunk)
-    
+        return meth(self, byte_chunk) if byte_chunk.inside_html else False
+
     return wrap
 
 
@@ -207,9 +201,7 @@ def not_html_comment(meth):
 
     @wraps(meth)
     def wrap(self, byte_chunk):
-        if byte_chunk.inside_comment:
-            return False
-        return meth(self, byte_chunk)
+        return False if byte_chunk.inside_comment else meth(self, byte_chunk)
 
     return wrap
 
@@ -226,16 +218,10 @@ class HtmlTag(HtmlContext):
     @inside_html
     @not_html_comment
     def match(self, byte_chunk):
-        if byte_chunk.nhtml and byte_chunk.nhtml[-1] == '<':
-            return True
-
-        return False
+        return bool(byte_chunk.nhtml and byte_chunk.nhtml[-1] == '<')
 
     def can_break(self, payload):
-        for i in [' ', '>']:
-            if i in payload:
-                return True
-        return False
+        return any(i in payload for i in [' ', '>'])
 
 
 class HtmlText(HtmlContext):
@@ -246,14 +232,10 @@ class HtmlText(HtmlContext):
     @inside_html
     @not_html_comment
     def match(self, byte_chunk):
-        if byte_chunk.nhtml.rfind('<') <= byte_chunk.nhtml.rfind('>'):
-            return True
-        return False
+        return byte_chunk.nhtml.rfind('<') <= byte_chunk.nhtml.rfind('>')
 
     def can_break(self, payload):
-        if "<" in payload:
-            return True
-        return False
+        return "<" in payload
 
 
 class HtmlComment(HtmlContext):
@@ -266,10 +248,7 @@ class HtmlComment(HtmlContext):
         return byte_chunk.inside_comment
 
     def can_break(self, payload):
-        for i in ['-', '>', '<']:
-            if i not in payload:
-                return False
-        return True
+        return all(i in payload for i in ['-', '>', '<'])
 
 
 class HtmlAttr(HtmlContext):
@@ -298,16 +277,10 @@ class HtmlAttr(HtmlContext):
                     quote_character = s
                     continue
 
-        if not quote_character and len(data[open_angle_bracket+1:]):
-            return True
-
-        return False
+        return bool(not quote_character and len(data[open_angle_bracket+1:]))
 
     def can_break(self, payload):
-        for i in [' ', '=']:
-            if i not in payload:
-                return False
-        return True
+        return all(i in payload for i in [' ', '='])
 
 
 class HtmlAttrQuote(HtmlAttr):
@@ -342,22 +315,17 @@ class HtmlAttrQuote(HtmlAttr):
                     quote_character = s
                     continue
 
-        if quote_character == self.quote_character:
-            return True
-
-        return False
+        return quote_character == self.quote_character
 
     def can_break(self, payload):
-        if self.quote_character in payload:
-            return True
-        return False
+        return self.quote_character in payload
 
     def is_executable(self):
         data = self.data.lower().replace(' ', '')
-        for attr_name in (self.html_url_attrs + JS_EVENTS):
-            if data.endswith(attr_name + '=' + self.quote_character):
-                return True
-        return False
+        return any(
+            data.endswith(f'{attr_name}={self.quote_character}')
+            for attr_name in self.html_url_attrs + JS_EVENTS
+        )
 
 
 class HtmlAttrSingleQuote(HtmlAttrQuote):
@@ -391,16 +359,12 @@ class ScriptContext(Context):
     @inside_js
     def _inside_multi_comment(self, byte_chunk):
         # We are inside /*...
-        if byte_chunk.nhtml.rfind('/*') <= byte_chunk.nhtml.rfind('*/'):
-            return False
-        return True
+        return byte_chunk.nhtml.rfind('/*') > byte_chunk.nhtml.rfind('*/')
 
     @inside_js
     def _inside_line_comment(self, byte_chunk):
         last_line = byte_chunk.nhtml.split('\n')[-1].strip()
-        if last_line.find('//') == 0:
-            return True
-        return False
+        return last_line.find('//') == 0
 
 
 class StyleContext(Context):
@@ -408,9 +372,7 @@ class StyleContext(Context):
     @inside_style
     def inside_comment(self, byte_chunk):
         # We are inside /*...*/
-        if byte_chunk.nhtml.rfind('/*') <= byte_chunk.nhtml.rfind('*/'):
-            return False
-        return True
+        return byte_chunk.nhtml.rfind('/*') > byte_chunk.nhtml.rfind('*/')
 
 
 class ScriptMultiComment(ScriptContext):
@@ -422,10 +384,7 @@ class ScriptMultiComment(ScriptContext):
         return self._inside_multi_comment(byte_chunk)
 
     def can_break(self, payload):
-        for i in ['/', '*']:
-            if i not in payload:
-                return False
-        return True
+        return all(i in payload for i in ['/', '*'])
 
 
 class ScriptLineComment(ScriptContext):
@@ -437,10 +396,7 @@ class ScriptLineComment(ScriptContext):
         return self._inside_line_comment(byte_chunk)
 
     def can_break(self, payload):
-        for i in ['\n']:
-            if i not in payload:
-                return False
-        return True
+        return all(i in payload for i in ['\n'])
 
 
 class ScriptQuote(ScriptContext):
@@ -465,15 +421,10 @@ class ScriptQuote(ScriptContext):
                     quote_character = s
                     continue
 
-        if quote_character == self.quote_character:
-            return True
-
-        return False
+        return quote_character == self.quote_character
 
     def can_break(self, payload):
-        if self.quote_character in payload:
-            return True
-        return False
+        return self.quote_character in payload
 
 
 class ScriptSingleQuote(ScriptQuote):
@@ -511,16 +462,10 @@ class StyleText(StyleContext):
                     quote_character = s
                     continue
 
-        if not quote_character:
-            return True
-
-        return False
+        return not quote_character
 
     def can_break(self, payload):
-        for i in ['<', '/']:
-            if i not in payload:
-                return False
-        return True
+        return all(i in payload for i in ['<', '/'])
 
 
 class ScriptText(ScriptContext):
@@ -533,15 +478,10 @@ class ScriptText(ScriptContext):
         return self._match(byte_chunk)
 
     def _match(self, byte_chunk):
-        if self.inside_comment(byte_chunk):
-            return False
-        return True
+        return not self.inside_comment(byte_chunk)
 
     def can_break(self, payload):
-        for i in ['<', '/']:
-            if i not in payload:
-                return False
-        return True
+        return all(i in payload for i in ['<', '/'])
 
     def is_executable(self):
         return True
@@ -556,10 +496,7 @@ class StyleComment(StyleContext):
         return self.inside_comment(byte_chunk)
 
     def can_break(self, payload):
-        for i in ['/', '*']:
-            if i not in payload:
-                return False
-        return True
+        return all(i in payload for i in ['/', '*'])
 
 
 class StyleQuote(StyleContext):
@@ -584,15 +521,10 @@ class StyleQuote(StyleContext):
                     quote_character = s
                     continue
 
-        if quote_character == self.quote_character:
-            return True
-
-        return False
+        return quote_character == self.quote_character
 
     def can_break(self, data):
-        if self.quote_character in data:
-            return True
-        return False
+        return self.quote_character in data
 
 
 class StyleSingleQuote(StyleQuote):
@@ -623,7 +555,7 @@ class HtmlAttrDoubleQuote2Script(HtmlAttrDoubleQuote):
         data = byte_chunk.nhtml.lower().replace(' ', '')
 
         for attr_name in JS_EVENTS:
-            if data.endswith(attr_name + '=' + self.quote_character):
+            if data.endswith(f'{attr_name}={self.quote_character}'):
                 break
         else:
             return False
@@ -638,13 +570,11 @@ class HtmlAttrDoubleQuote2ScriptText(HtmlAttrDoubleQuote2Script, ScriptText):
         self.name = 'HTML_ATTR_DOUBLE_QUOTE2SCRIPT_TEXT'
 
     def match(self, byte_chunk):
-        if not HtmlAttrDoubleQuote2Script.match(self, byte_chunk):
-            return False
-
-        if not ScriptText._match(self, byte_chunk):
-            return False
-
-        return True
+        return (
+            bool(ScriptText._match(self, byte_chunk))
+            if HtmlAttrDoubleQuote2Script.match(self, byte_chunk)
+            else False
+        )
 
     def can_break(self, payload):
         return HtmlAttrDoubleQuote2Script.can_break(self, payload)
@@ -654,21 +584,32 @@ class HtmlAttrDoubleQuote2ScriptText(HtmlAttrDoubleQuote2Script, ScriptText):
 
 
 def get_contexts():
-    contexts = [HtmlAttrSingleQuote(), HtmlAttrDoubleQuote(),
-                HtmlAttrBackticks(), HtmlAttr(), HtmlTag(), HtmlText(),
-                HtmlComment(), ScriptMultiComment(), ScriptLineComment(),
-                ScriptSingleQuote(), ScriptDoubleQuote(), ScriptText(),
-                StyleText(), StyleComment(), StyleSingleQuote(),
-                StyleDoubleQuote()]
     #contexts.append(HtmlAttrDoubleQuote2ScriptText())
-    return contexts
+    return [
+        HtmlAttrSingleQuote(),
+        HtmlAttrDoubleQuote(),
+        HtmlAttrBackticks(),
+        HtmlAttr(),
+        HtmlTag(),
+        HtmlText(),
+        HtmlComment(),
+        ScriptMultiComment(),
+        ScriptLineComment(),
+        ScriptSingleQuote(),
+        ScriptDoubleQuote(),
+        ScriptText(),
+        StyleText(),
+        StyleComment(),
+        StyleSingleQuote(),
+        StyleDoubleQuote(),
+    ]
 
 
 def get_context(data, payload):
     """
     :return: A list which contains lists of contexts
     """
-    return [c for c in get_context_iter(data, payload)]
+    return list(get_context_iter(data, payload))
 
 
 def get_context_iter(data, payload):
@@ -701,7 +642,7 @@ class ByteChunk(object):
     set.
     """
     def __init__(self, data):
-        self.attributes = dict()
+        self.attributes = {}
         self.data = data
 
     def __repr__(self):
@@ -713,21 +654,15 @@ class ByteChunk(object):
 
     @cached_property
     def inside_html(self):
-        if self.inside_js or self.inside_style:
-            return False
-
-        return True
+        return not self.inside_js and not self.inside_style
 
     @cached_property
     def inside_comment(self):
-        if not self.inside_html:
-            return False
-
-        # We are inside <!--...-->
-        if self.nhtml.rfind('<!--') <= self.nhtml.rfind('-->'):
-            return False
-        
-        return True
+        return (
+            self.nhtml.rfind('<!--') > self.nhtml.rfind('-->')
+            if self.inside_html
+            else False
+        )
 
     @cached_property
     def html_attr(self):
@@ -746,17 +681,16 @@ class ByteChunk(object):
         for s in data[open_angle_bracket:]:
             i += 1
 
-            if s in ATTR_DELIMITERS and not quote_character:
-                quote_character = s
-                if inside_value and open_context:
-                    open_context = i + 1
+            if s in ATTR_DELIMITERS:
+                if not quote_character:
+                    quote_character = s
+                    if inside_value and open_context:
+                        open_context = i + 1
+                else:
+                    quote_character = None
+                    inside_value = False
+                    open_context = None
                 continue
-            elif s in ATTR_DELIMITERS and quote_character:
-                quote_character = None
-                inside_value = False
-                open_context = None
-                continue
-
             if quote_character:
                 continue
 
@@ -781,41 +715,28 @@ class ByteChunk(object):
     def inside_js(self):
         script_index = self.nhtml.lower().rfind('<script')
 
-        if script_index > self.nhtml.lower().rfind('</script>') and \
-        self.nhtml[script_index:].count('>'):
-            return True
-
-        return False
+        return bool(
+            script_index > self.nhtml.lower().rfind('</script>')
+            and self.nhtml[script_index:].count('>')
+        )
 
     @cached_property
     def inside_style(self):
         style_index = self.nhtml.lower().rfind('<style')
 
-        if style_index > self.nhtml.lower().rfind('</style>') and \
-        self.nhtml[style_index:].count('>'):
-            return True
-
-        return False
+        return bool(
+            style_index > self.nhtml.lower().rfind('</style>')
+            and self.nhtml[style_index:].count('>')
+        )
 
     def inside_html_attr(self, attrs):
         attr_data = self.html_attr
-        if not attr_data:
-            return False
-
-        for attr in attrs:
-            if attr == attr_data[0]:
-                return True
-
-        return False
+        return any(attr == attr_data[0] for attr in attrs) if attr_data else False
 
     @cached_property
     def inside_event_attr(self):
-        if self.inside_html_attr(JS_EVENTS):
-            return True
-        return False
+        return bool(self.inside_html_attr(JS_EVENTS))
 
     @cached_property
     def inside_style_attr(self):
-        if self.inside_html_attr(['style']):
-            return True
-        return False
+        return bool(self.inside_html_attr(['style']))

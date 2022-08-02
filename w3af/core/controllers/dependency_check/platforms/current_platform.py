@@ -44,8 +44,7 @@ def get_current_platform(known_platforms=KNOWN_PLATFORMS):
     for known_platform in known_platforms:
         if known_platform.is_current_platform():
             return known_platform()
-    else:
-        return DefaultPlatform()
+    return DefaultPlatform()
 
 
 

@@ -9,10 +9,7 @@ import sys
 
 def python_major():
     """Return an integer corresponding to the major version # of the python interpreter we're running on"""
-    # This originally used the platform module, but platform fails on IronPython; sys.version seems to work
-    # on everything I've tried
-    result = sys.version_info[0]
-    return result
+    return sys.version_info[0]
 
 if python_major() == 2:
     empty_bytes = ''
@@ -45,10 +42,7 @@ elif python_major() == 3:
 
     def string_to_binary(string):
         """Convert a text string (or binary string type) to a binary string type"""
-        if isinstance(string, str):
-            return string.encode('latin-1')
-        else:
-            return string
+        return string.encode('latin-1') if isinstance(string, str) else string
 
     def binary_to_intlist(binary):
         """Convert a binary string to a list of integers"""

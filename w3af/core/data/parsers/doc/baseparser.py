@@ -41,12 +41,11 @@ class BaseParser(object):
 
         encoding = http_response.get_charset()
         if not is_known_encoding(encoding):
-            raise ValueError('Unknown encoding: %s' % encoding)
+            raise ValueError(f'Unknown encoding: {encoding}')
 
         # "set_base_url"
         url = http_response.get_url()
-        redir_url = http_response.get_redir_url()
-        if redir_url:
+        if redir_url := http_response.get_redir_url():
             url = redir_url
 
         self._base_url = url

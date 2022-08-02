@@ -50,7 +50,7 @@ def html_export(request_string):
         post_data = http_request.get_raw_data()
 
         for token in post_data.iter_tokens():
-            res += '<label>' + cgi.escape(token.get_name()) + '</label>\n'
+            res += f'<label>{cgi.escape(token.get_name())}' + '</label>\n'
             res += '<input type="text" name="' + \
                 cgi.escape(token.get_name().strip(), True)
             res += '" value="' + cgi.escape(token.get_value(), True) + '">\n'

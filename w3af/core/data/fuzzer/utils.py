@@ -66,5 +66,4 @@ def create_format_string(length):
     """
     :return: A string with $length %s and a final %n
     """
-    result = '%n' * length
-    return result
+    return '%n' * length

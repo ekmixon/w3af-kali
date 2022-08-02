@@ -69,8 +69,7 @@ class InputFileOption(BaseOption):
                  set_value we're going to replace the %ROOT_PATH% with ROOT_PATH
         """
         abs_path = os.path.abspath(self._value)
-        replaced_value = abs_path.replace(ROOT_PATH, ROOT_PATH_VAR)
-        return replaced_value
+        return abs_path.replace(ROOT_PATH, ROOT_PATH_VAR)
 
     def validate(self, value):
 

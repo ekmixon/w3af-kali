@@ -142,7 +142,7 @@ class ExceptionHandler(object):
 
         :return: None
         """
-        filename = 'w3af-crash-%s.txt' % rand_alnum(5)
+        filename = f'w3af-crash-{rand_alnum(5)}.txt'
         filename = os.path.join(tempfile.gettempdir(), filename)
         crash_dump = file(filename, "w")
         crash_dump.write(edata.get_details())
@@ -183,23 +183,6 @@ class ExceptionHandler(object):
         @see: generate_summary method for a way of getting a summary in a
               different format.
         """
-        fmt_with_exceptions = 'During the current scan (with id: %s) w3af'\
-                              ' caught %s exceptions in it\'s plugins. The'\
-                              ' scan was able to continue by ignoring those'\
-                              ' failures but the result is most likely'\
-                              ' incomplete.\n\n'\
-                              'These are the phases and plugins that raised'\
-                              ' exceptions:\n'\
-                              '%s\n'\
-                              'We recommend you report these vulnerabilities'\
-                              ' to the developers in order to help increase'\
-                              ' the project\'s stability.\n'\
-                              'To report these bugs just run the "report"' \
-                              ' command.'
-
-        fmt_without_exceptions = 'No exceptions were raised during scan with' \
-                                 ' id: %s.'
-
         summary = self.generate_summary()
 
         if summary['total_exceptions']:
@@ -208,14 +191,31 @@ class ExceptionHandler(object):
                 for plugin, fr, exception, traceback in summary['exceptions'][phase]:
                     phase_plugin_str += '- %s.%s\n' % (phase, plugin)
 
-            with_exceptions = fmt_with_exceptions % (self.get_scan_id(),
-                                                     summary[
-                                                     'total_exceptions'],
-                                                     phase_plugin_str)
-            return with_exceptions
+            fmt_with_exceptions = 'During the current scan (with id: %s) w3af'\
+                                      ' caught %s exceptions in it\'s plugins. The'\
+                                      ' scan was able to continue by ignoring those'\
+                                      ' failures but the result is most likely'\
+                                      ' incomplete.\n\n'\
+                                      'These are the phases and plugins that raised'\
+                                      ' exceptions:\n'\
+                                      '%s\n'\
+                                      'We recommend you report these vulnerabilities'\
+                                      ' to the developers in order to help increase'\
+                                      ' the project\'s stability.\n'\
+                                      'To report these bugs just run the "report"' \
+                                      ' command.'
+
+            return fmt_with_exceptions % (
+                self.get_scan_id(),
+                summary['total_exceptions'],
+                phase_plugin_str,
+            )
+
         else:
-            without_exceptions = fmt_without_exceptions % self.get_scan_id()
-            return without_exceptions
+            fmt_without_exceptions = 'No exceptions were raised during scan with' \
+                                         ' id: %s.'
+
+            return fmt_without_exceptions % self.get_scan_id()
 
     def generate_summary(self):
         """
@@ -249,10 +249,7 @@ class ExceptionHandler(object):
                  systems.
         """
         if not self._scan_id:
-            hash_data = ''
-            hash_data += str(
-                random.randint(1, 50000000) * random.randint(1, 50000000))
-
+            hash_data = '' + str(random.randint(1, 50000000)**2)
             m = hashlib.md5(hash_data)
             self._scan_id = m.hexdigest()[:10]
 
@@ -294,10 +291,18 @@ class ExceptionData(object):
 
     def get_summary(self):
         res = 'A "%s" exception was found while running %s.%s on "%s". The'\
-              ' exception was: "%s" at %s:%s():%s.'
-        res = res % (self.get_exception_class(), self.phase, self.plugin,
-                     self.fuzzable_request, self.exception, self.filename,
-                     self.function_name, self.lineno)
+                  ' exception was: "%s" at %s:%s():%s.'
+        res %= (
+            self.get_exception_class(),
+            self.phase,
+            self.plugin,
+            self.fuzzable_request,
+            self.exception,
+            self.filename,
+            self.function_name,
+            self.lineno,
+        )
+
         return res
 
     def get_exception_class(self):
@@ -309,7 +314,7 @@ class ExceptionData(object):
         return res
 
     def get_where(self):
-        return '%s.%s:%s' % (self.phase, self.plugin, self.lineno)
+        return f'{self.phase}.{self.plugin}:{self.lineno}'
 
     def __str__(self):
         return self.get_details()

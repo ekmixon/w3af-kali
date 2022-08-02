@@ -74,9 +74,8 @@ class Test404FuzzyStringMatch(unittest.TestCase):
             self.not_exists_data.close()
 
     def _create_http_response(self, domain, body, is_404):
-        url = URL('http://%s/%s' % (domain, FAILED_FILENAME if is_404 else ''))
-        resp = HTTPResponse(200, body, self.empty_headers, url, url)
-        return resp
+        url = URL(f"http://{domain}/{FAILED_FILENAME if is_404 else ''}")
+        return HTTPResponse(200, body, self.empty_headers, url, url)
 
     def _gunzip(self, http_body):
         try:
@@ -127,16 +126,16 @@ class Test404FuzzyStringMatch(unittest.TestCase):
         perc_fail = len(failed_domains) / total
         func_name = fuzzy_func.__name__
 
-        print('%s fail rate: %s' % (func_name, perc_fail))
-        print('Total time: %ss' % (end-start))
-        print('Analyzed samples: %s' % total)
+        print(f'{func_name} fail rate: {perc_fail}')
+        print(f'Total time: {end - start}s')
+        print(f'Analyzed samples: {total}')
 
-        output = '/tmp/%s.txt' % func_name
+        output = f'/tmp/{func_name}.txt'
         output_fh = file(output, 'w')
         for domain_a, domain_b in sorted(failed_domains):
             output_fh.write('%s - %s\n' % (domain_a, domain_b))
 
-        print('Failed domains stored at %s' % output)
+        print(f'Failed domains stored at {output}')
 
     def generic_fuzzy_string_diff_runner_against_404(self, fuzzy_func, ratio):
         """
@@ -166,16 +165,16 @@ class Test404FuzzyStringMatch(unittest.TestCase):
         perc_fail = len(failed_domains) / total
         func_name = fuzzy_func.__name__
 
-        print('%s fail rate: %s' % (func_name, perc_fail))
-        print('Total time: %ss' % (end-start))
-        print('Analyzed samples: %s' % total)
+        print(f'{func_name} fail rate: {perc_fail}')
+        print(f'Total time: {end - start}s')
+        print(f'Analyzed samples: {total}')
 
-        output = '/tmp/%s.txt' % func_name
+        output = f'/tmp/{func_name}.txt'
         output_fh = file(output, 'w')
         for domain in sorted(failed_domains):
             output_fh.write('%s\n' % domain)
 
-        print('Failed domains stored at %s' % output)
+        print(f'Failed domains stored at {output}')
         #
         #   Hah! At some point I thought this was possible!
         #
@@ -194,7 +193,7 @@ class Test404FuzzyStringMatch(unittest.TestCase):
 
         for i in xrange(len(chunks)):
             noise = ''.join(random.choice(printable) for _ in range(each_noise_len))
-            str_with_noise += '%s%s' % (chunks[i], noise)
+            str_with_noise += f'{chunks[i]}{noise}'
 
         return str_with_noise
 
@@ -229,16 +228,16 @@ class Test404FuzzyStringMatch(unittest.TestCase):
         perc_fail = len(failed_domains) / total
         func_name = fuzzy_func.__name__
 
-        print('%s fail rate: %s' % (func_name, perc_fail))
-        print('Total time: %ss' % (end-start))
-        print('Analyzed samples: %s' % total)
+        print(f'{func_name} fail rate: {perc_fail}')
+        print(f'Total time: {end - start}s')
+        print(f'Analyzed samples: {total}')
 
-        output = '/tmp/%s.txt' % func_name
+        output = f'/tmp/{func_name}.txt'
         output_fh = file(output, 'w')
         for domain in sorted(failed_domains):
             output_fh.write('%s\n' % domain)
 
-        print('Failed domains stored at %s' % output)
+        print(f'Failed domains stored at {output}')
 
     def test_fuzzy_equal(self):
         """
@@ -274,17 +273,6 @@ class Test404FuzzyStringMatch(unittest.TestCase):
         """
         raise SkipTest('This one raises a MemoryError')
 
-        # Import it here to avoid issues with missing dependencies in CI
-        import jellyfish
-
-        def jelly_fuzzy(str_a, str_b, ratio):
-            str_a = str_a.replace('\0', '')
-            str_b = str_b.replace('\0', '')
-            minl = min(len(str_a), len(str_b))
-            return (jellyfish.levenshtein_distance(str_a, str_b) / minl) > ratio
-
-        self.generic_fuzzy_string_diff_runner_against_404(jelly_fuzzy, IS_EQUAL_RATIO)
-
     def test_tokenized_set(self):
         """
         tokenized_set fail rate: 0.120788824979
@@ -310,8 +298,8 @@ class Test404FuzzyStringMatch(unittest.TestCase):
             Analyzed samples: 1218
         """
         def tokenized_set(str_a, str_b, ratio):
-            set_a = set(hash(x) for x in str_a.split(' '))
-            set_b = set(hash(x) for x in str_b.split(' '))
+            set_a = {hash(x) for x in str_a.split(' ')}
+            set_b = {hash(x) for x in str_b.split(' ')}
             maxl = max(len(set_a), len(set_b))
             return (len(set_a.intersection(set_b)) / maxl) > ratio
 
@@ -341,15 +329,12 @@ class Test404FuzzyStringMatch(unittest.TestCase):
         Analyzed samples: 1218
         """
         def tokenized_set(str_a, str_b, ratio):
-            set_a = set(x for x in str_a.split(' ') if len(x) > 12)
-            set_b = set(x for x in str_b.split(' ') if len(x) > 12)
+            set_a = {x for x in str_a.split(' ') if len(x) > 12}
+            set_b = {x for x in str_b.split(' ') if len(x) > 12}
             maxl = max(len(set_a), len(set_b))
 
             intersect = set_a.intersection(set_b)
-            if not intersect:
-                return False
-
-            return (len(intersect) / maxl) > ratio
+            return (len(intersect) / maxl) > ratio if intersect else False
 
         self.generic_fuzzy_string_diff_runner_against_404(tokenized_set, IS_EQUAL_RATIO)
 
@@ -360,15 +345,12 @@ class Test404FuzzyStringMatch(unittest.TestCase):
         Analyzed samples: 1218
         """
         def tokenized_set(str_a, str_b, ratio):
-            set_a = set(x for x in str_a.split(' ') if len(x) < 12)
-            set_b = set(x for x in str_b.split(' ') if len(x) < 12)
+            set_a = {x for x in str_a.split(' ') if len(x) < 12}
+            set_b = {x for x in str_b.split(' ') if len(x) < 12}
             maxl = max(len(set_a), len(set_b))
 
             intersect = set_a.intersection(set_b)
-            if not intersect:
-                return False
-
-            return (len(intersect) / maxl) > ratio
+            return (len(intersect) / maxl) > ratio if intersect else False
 
         self.generic_fuzzy_string_diff_runner_against_404(tokenized_set, IS_EQUAL_RATIO)
 

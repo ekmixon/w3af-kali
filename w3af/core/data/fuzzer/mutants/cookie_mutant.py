@@ -57,9 +57,15 @@ class CookieMutant(Mutant):
         This is a very important method which is called in order to create
         mutants. Usually called from fuzzer.py module.
         """
-        if not fuzzer_config['fuzz_cookies']:
-            return []
-
-        return cls._create_mutants_worker(freq, cls, mutant_str_list,
-                                          fuzzable_param_list, append,
-                                          fuzzer_config)
+        return (
+            cls._create_mutants_worker(
+                freq,
+                cls,
+                mutant_str_list,
+                fuzzable_param_list,
+                append,
+                fuzzer_config,
+            )
+            if fuzzer_config['fuzz_cookies']
+            else []
+        )

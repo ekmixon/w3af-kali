@@ -52,7 +52,7 @@ class ListOption(BaseOption):
         self._value = self.validate(value)
 
     def validate(self, value):
-        temp_value = value + ','
+        temp_value = f'{value},'
         mo = self.LST_VALIDATION_RE.match(temp_value)
         try:
             matched_str = mo.group(0)
@@ -72,7 +72,7 @@ class ListOption(BaseOption):
 
                 # Now I check for single and double quotes
                 if (item.startswith('"') and item.endswith('"')) or \
-                   (item.startswith("'") and item.endswith("'")):
+                       (item.startswith("'") and item.endswith("'")):
                     res.append(item[1:-1])
                 else:
                     res.append(item)

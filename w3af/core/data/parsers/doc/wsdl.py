@@ -48,10 +48,6 @@ class WSDLParser(object):
         :return: True if the data parameter is a WSDL document.
         """
         return False
-        if '<definitions' in data[:150] or '<wsdl:definitions' in data[:150]:
-            return True
-        else:
-            return False
 
     def set_wsdl(self, xmlData):
         """
@@ -88,8 +84,7 @@ class WSDLParser(object):
         """
         if methodName in self._proxy.methods.keys():
             action_str = str(self._proxy.methods[methodName].soapAction)
-            action_url = URL(action_str)
-            return action_url
+            return URL(action_str)
         else:
             raise BaseFrameworkException('Unknown method name.')
 
@@ -100,8 +95,7 @@ class WSDLParser(object):
         """
         if methodName in self._proxy.methods.keys():
             location_str = str(self._proxy.methods[methodName].location)
-            location_url = URL(location_str)
-            return location_url
+            return URL(location_str)
         else:
             raise BaseFrameworkException('Unknown method name.')
 
@@ -127,19 +121,18 @@ class WSDLParser(object):
         @methodName: The method name
         :return: The soap action.
         """
-        if not methodName in self._proxy.methods.keys():
+        if methodName not in self._proxy.methods.keys():
             raise BaseFrameworkException('Unknown method name.')
-        else:
-            res = []
-            inps = self._proxy.methods[methodName].inparams
-            for param in range(len(inps)):
-                details = inps[param]
-                parameterObject = parameter()
-                parameterObject.set_name(str(details.name))
-                parameterObject.set_type(str(details.type[1]))
-                parameterObject.set_ns(str(details.type[0]))
-                res.append(parameterObject)
-            return res
+        res = []
+        inps = self._proxy.methods[methodName].inparams
+        for param in range(len(inps)):
+            details = inps[param]
+            parameterObject = parameter()
+            parameterObject.set_name(str(details.name))
+            parameterObject.set_type(str(details.type[1]))
+            parameterObject.set_ns(str(details.type[0]))
+            res.append(parameterObject)
+        return res
 
 
 class parameter:

@@ -41,7 +41,7 @@ class TestJSONIterSetters(unittest.TestCase):
 
     def test_int(self):
         json_data = JSONContainer.get_mutable_json(NUMBER)
-        jis = [(k, v, s) for k, v, s in json_iter_setters(json_data)]
+        jis = list(json_iter_setters(json_data))
 
         self.assertEqual(len(jis), 1)
 
@@ -56,7 +56,7 @@ class TestJSONIterSetters(unittest.TestCase):
 
     def test_string(self):
         json_data = JSONContainer.get_mutable_json(STRING)
-        jis = [(k, v, s) for k, v, s in json_iter_setters(json_data)]
+        jis = list(json_iter_setters(json_data))
 
         self.assertEqual(len(jis), 1)
 
@@ -71,7 +71,7 @@ class TestJSONIterSetters(unittest.TestCase):
 
     def test_array(self):
         json_data = JSONContainer.get_mutable_json(ARRAY)
-        jis = [(k, v, s) for k, v, s in json_iter_setters(json_data)]
+        jis = list(json_iter_setters(json_data))
 
         self.assertEqual(len(jis), 3)
 
@@ -104,7 +104,7 @@ class TestJSONIterSetters(unittest.TestCase):
 
     def test_object(self):
         json_data = JSONContainer.get_mutable_json(OBJECT)
-        jis = [(k, v, s) for k, v, s in json_iter_setters(json_data)]
+        jis = list(json_iter_setters(json_data))
 
         self.assertEqual(len(jis), 2)
 
@@ -132,7 +132,7 @@ class TestJSONIterSetters(unittest.TestCase):
 
     def test_complex_object(self):
         json_data = JSONContainer.get_mutable_json(COMPLEX_OBJECT)
-        jis = [(k, v, s) for k, v, s in json_iter_setters(json_data)]
+        jis = list(json_iter_setters(json_data))
 
         self.assertEqual(len(jis), 4)
         payload_complex = COMPLEX_OBJECT[:]

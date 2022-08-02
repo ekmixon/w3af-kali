@@ -100,13 +100,7 @@ class HTMLParser(SGMLParser):
         if ct_subtype.startswith('vnd.'):
             return False
 
-        if ct_type in HTMLParser.WILD_ACCEPT_CONTENT_TYPES:
-            return True
-
-        if ct_type in HTMLParser.IGNORE_CONTENT_TYPES:
-            return False
-
-        return False
+        return ct_type in HTMLParser.WILD_ACCEPT_CONTENT_TYPES
 
     def _handle_script_tag_start(self, tag, tag_name, attrs):
         """
@@ -133,7 +127,7 @@ class HTMLParser(SGMLParser):
     def _form_elems_generic_handler(self, tag, tag_name, attrs):
         side = 'inside' if self._inside_form else 'outside'
         default = lambda *args: None
-        handler = '_handle_%s_tag_%s_form' % (tag_name, side)
+        handler = f'_handle_{tag_name}_tag_{side}_form'
         meth = getattr(self, handler, default)
         meth(tag, tag_name, attrs)
 
@@ -263,9 +257,7 @@ class HTMLParser(SGMLParser):
         """
         Handler for select tag inside a form
         """
-        select_name = get_value_by_key(attrs, 'name', 'id')
-
-        if select_name:
+        if select_name := get_value_by_key(attrs, 'name', 'id'):
             self._select_input_name = select_name
 
     def _handle_select_tag_end(self, tag):
@@ -296,9 +288,7 @@ class HTMLParser(SGMLParser):
         """
         Handler for option tag inside a form
         """
-        option_value = get_value_by_key(attrs, 'value')
-
-        if option_value:
+        if option_value := get_value_by_key(attrs, 'value'):
             self._select_option_values.add(option_value)
 
     _handle_input_tag_start = _form_elems_generic_handler

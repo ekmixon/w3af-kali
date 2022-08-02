@@ -96,20 +96,20 @@ class w3afCore(object):
         # output manager thread to start it's work. I would start that thread
         # on output manager instantiation but there are issues with starting
         # threads at module import time.
-        om.out.debug('Created new w3afCore instance: %s' % id(self))
+        om.out.debug(f'Created new w3afCore instance: {id(self)}')
 
         # Create some directories, do this every time before starting a new
         # scan and before doing any other core init because these are widely
         # used
         self._home_directory()
         self._tmp_directory()
-        
+
         # We want to have only one exception handler instance during the whole
         # w3af process. The data captured by it will be cleared before starting
         # each scan, but we want to keep the same instance after a scan because
         # we'll extract info from it.
         self.exception_handler = ExceptionHandler()
-        
+
         # These are some of the most important moving parts in the w3afCore
         # they basically handle every aspect of the w3af framework. I create
         # these here because they are used by the UIs even before starting a
@@ -119,15 +119,15 @@ class w3afCore(object):
         self.status = w3af_core_status(self)
         self.target = w3af_core_target()
         self.strategy = CoreStrategy(self)
-        
+
         # FIXME: In the future, when the output_manager is not an awful
         # singleton anymore, this line should be removed and the output_manager
         # object should take a w3afCore object as a parameter in its __init__
         om.manager.set_w3af_core(self)
-        
+
         # Create the URI opener object
         self.uri_opener = ExtendedUrllib()
-        
+
         # Keep track of first scan to call cleanup or not
         self._first_scan = True
 
@@ -148,19 +148,19 @@ class w3afCore(object):
 
         if not self._first_scan:
             self.cleanup()
-        
+
         else:
             # Create some directories, do this every time before starting a new
             # scan and before doing any other core init because these are
             # widely used
             self._home_directory()
             self._tmp_directory()
-            
+
             enable_dns_cache()
-        
+
         # Reset global sequence number generator
         consecutive_number_generator.reset()
-               
+
         # Now that we know we're going to run a new scan, overwrite the old
         # strategy which might still have data stored in it and create a new
         # one  
@@ -372,19 +372,19 @@ class w3afCore(object):
         for _ in xrange(int(wait_max/loop_delay)):
             if not self.status.is_running():
                 core_stop_time = epoch_to_string(stop_start_time)
-                msg = '%s were needed to stop the core.' % core_stop_time
+                msg = f'{core_stop_time} were needed to stop the core.'
                 break
-            
+
             try:
                 time.sleep(loop_delay)
             except KeyboardInterrupt:
                 msg = 'The user cancelled the cleanup process, forcing exit.'
                 break
-            
+
         else:
             msg = 'The core failed to stop in %s seconds, forcing exit.'
             msg %= wait_max
-        
+
         om.out.debug(msg)
 
         # Finally we terminate+join the worker pool

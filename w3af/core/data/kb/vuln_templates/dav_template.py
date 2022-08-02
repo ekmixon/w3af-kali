@@ -43,12 +43,12 @@ class DAVTemplate(BaseTemplate):
         """
         ol = OptionList()
 
-        d = 'Vulnerability name (eg. %s)' % self.get_vulnerability_name()
+        d = f'Vulnerability name (eg. {self.get_vulnerability_name()})'
         o = opt_factory('name', self.name, d, 'string')
         ol.add(o)
 
         d = 'URL pointing to the path that is vulnerable to file uploads via'\
-            ' misconfigured DAV module (HTTP PUT method).'
+                ' misconfigured DAV module (HTTP PUT method).'
         o = opt_factory('url', self.url, d, 'url')
         ol.add(o)
 

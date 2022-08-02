@@ -38,13 +38,13 @@ from w3af.core.data.url.HTTPRequest import HTTPRequest
 
 
 def verify_has_db(meth):
-    
+
     @wraps(meth)
     def inner_verify_has_db(self, *args, **kwds):
         if self._db is None:
             raise RuntimeError('The database is not initialized yet.')
         return meth(self, *args, **kwds)
-    
+
     return inner_verify_has_db
 
 
@@ -83,9 +83,10 @@ class HistoryItem(object):
 
     def __init__(self):
         self._db = get_default_temp_db_instance()
-        
-        self._session_dir = os.path.join(get_temp_dir(),
-                                         self._db.get_file_name() + '_traces')
+
+        self._session_dir = os.path.join(
+            get_temp_dir(), f'{self._db.get_file_name()}_traces'
+        )
 
     def init(self):
         self.init_traces_dir()
@@ -142,21 +143,14 @@ class HistoryItem(object):
         orderData = [(name, direction)]
         """
         result = []
-        sql = 'SELECT * FROM ' + self._DATA_TABLE
+        sql = f'SELECT * FROM {self._DATA_TABLE}'
         where = WhereHelper(searchData)
         sql += where.sql()
-        orderby = ""
-        #
-        # TODO we need to move SQL code to parent class
-        #
-        for item in orderData:
-            orderby += item[0] + " " + item[1] + ","
-        orderby = orderby[:-1]
+        orderby = "".join(f"{item[0]} {item[1]}," for item in orderData)
+        if orderby := orderby[:-1]:
+            sql += f" ORDER BY {orderby}"
 
-        if orderby:
-            sql += " ORDER BY " + orderby
-
-        sql += ' LIMIT ' + str(result_limit)
+        sql += f' LIMIT {str(result_limit)}'
         try:
             for row in self._db.select(sql, where.values()):
                 item = self.__class__()
@@ -189,64 +183,55 @@ class HistoryItem(object):
         fname = self._get_fname_for_id(id)
         WAIT_TIME = 0.05
 
-        #
-        #    Due to some concurrency issues, we need to perform these checks
-        #
         for _ in xrange(int(1 / WAIT_TIME)):
             if not os.path.exists(fname):
                 time.sleep(WAIT_TIME)
                 continue
 
-            # Ok... the file exists, but it might still be being written
-            req_res = open(fname, 'rb')
+            with open(fname, 'rb') as req_res:
+                try:
+                    data = msgpack.load(req_res, use_list=True)
+                except ValueError:
+                    # ValueError: Extra data. returned when msgpack finds invalid
+                    # data in the file
+                    req_res.close()
+                    time.sleep(WAIT_TIME)
+                    continue
 
-            try:
-                data = msgpack.load(req_res, use_list=True)
-            except ValueError:
-                # ValueError: Extra data. returned when msgpack finds invalid
-                # data in the file
-                req_res.close()
-                time.sleep(WAIT_TIME)
-                continue
+                try:
+                    request_dict, response_dict, canary = data
+                except TypeError:
+                    # https://github.com/andresriancho/w3af/issues/1101
+                    # 'NoneType' object is not iterable
+                    req_res.close()
+                    time.sleep(WAIT_TIME)
+                    continue
 
-            try:
-                request_dict, response_dict, canary = data
-            except TypeError:
-                # https://github.com/andresriancho/w3af/issues/1101
-                # 'NoneType' object is not iterable
-                req_res.close()
-                time.sleep(WAIT_TIME)
-                continue
-
-            if not canary == self._MSGPACK_CANARY:
-                # read failed, most likely because the file write is not
-                # complete but for some reason it was a valid msgpack file
-                req_res.close()
-                time.sleep(WAIT_TIME)
-                continue
-
-            # Success!
-            req_res.close()
+                if canary != self._MSGPACK_CANARY:
+                    # read failed, most likely because the file write is not
+                    # complete but for some reason it was a valid msgpack file
+                    req_res.close()
+                    time.sleep(WAIT_TIME)
+                    continue
 
             request = HTTPRequest.from_dict(request_dict)
             response = HTTPResponse.from_dict(response_dict)
             return request, response
 
-        else:
-            msg = 'Timeout expecting trace file to be ready "%s"' % fname
-            raise IOError(msg)
+        msg = 'Timeout expecting trace file to be ready "%s"' % fname
+        raise IOError(msg)
 
     @verify_has_db
     def delete(self, _id=None):
         """Delete data from DB by ID."""
         if _id is None:
             _id = self.id
-            
-        sql = 'DELETE FROM ' + self._DATA_TABLE + ' WHERE id = ? '
+
+        sql = f'DELETE FROM {self._DATA_TABLE} WHERE id = ? '
         self._db.execute(sql, (_id,))
-        
+
         fname = self._get_fname_for_id(_id)
-        
+
         try:
             os.remove(fname)
         except OSError:
@@ -370,7 +355,7 @@ class HistoryItem(object):
                 self._MSGPACK_CANARY)
         msgpack.dump(data, req_res)
         req_res.close()
-        
+
         return True
 
     def get_columns(self):
@@ -387,7 +372,7 @@ class HistoryItem(object):
 
     def _update_field(self, name, value):
         """Update custom field in DB."""
-        sql = 'UPDATE %s SET %s = ? WHERE id = ?' % (self._DATA_TABLE, name)
+        sql = f'UPDATE {self._DATA_TABLE} SET {name} = ? WHERE id = ?'
         self._db.execute(sql, (value, self.id))
 
     def update_tag(self, value, force_db=False):

@@ -68,7 +68,7 @@ def create_mutants(freq, mutant_str_list, append=False, fuzzable_param_list=[],
         else:
             count_data[mutant.get_mutant_type()] = 1
 
-    count_summary = ', '.join(['%s: %s' % (i, j) for i, j in count_data.items()])
+    count_summary = ', '.join([f'{i}: {j}' for i, j in count_data.items()])
     om.out.debug(msg % (len(result), freq, count_summary))
 
     #
@@ -117,9 +117,7 @@ def _get_fuzzer_config():
              things that can be fuzzed.
     """
     config = cf.cf
-    fuzzer_config = {}
-
-    for conf_name, default in CONF_KEYS:
-        fuzzer_config[conf_name] = config.get(conf_name, default)
-
-    return fuzzer_config
+    return {
+        conf_name: config.get(conf_name, default)
+        for conf_name, default in CONF_KEYS
+    }

@@ -35,8 +35,7 @@ from w3af.core.controllers.misc.temp_dir import (get_temp_dir,
 def get_temp_filename():
     temp_dir = get_temp_dir()
     fname = ''.join(starmap(choice, repeat((string.letters,), 18)))
-    filename = os.path.join(temp_dir, fname + '.w3af.temp_db')
-    return filename
+    return os.path.join(temp_dir, f'{fname}.w3af.temp_db')
 
 
 class TestDBMS(unittest.TestCase):
@@ -53,10 +52,10 @@ class TestDBMS(unittest.TestCase):
     
     def test_simple_db(self):
         db = SQLiteDBMS(get_temp_filename())
-        db.create_table('TEST', set([('id', 'INT'), ('data', 'TEXT')])).result()
-        
+        db.create_table('TEST', {('id', 'INT'), ('data', 'TEXT')}).result()
+
         db.execute('INSERT INTO TEST VALUES (1,"a")').result()
-        
+
         self.assertIn(('1', 'a'), db.select('SELECT * from TEST'))
         self.assertEqual(('1', 'a'), db.select_one('SELECT * from TEST'))
 
@@ -67,10 +66,10 @@ class TestDBMS(unittest.TestCase):
 
     def test_default_db(self):
         db = get_default_temp_db_instance()
-        db.create_table('TEST', set([('id', 'INT'), ('data', 'TEXT')])).result()
-        
+        db.create_table('TEST', {('id', 'INT'), ('data', 'TEXT')}).result()
+
         db.execute('INSERT INTO TEST VALUES (1,"a")').result()
-        
+
         self.assertIn(('1', 'a'), db.select('SELECT * from TEST'))
         self.assertEqual(('1', 'a'), db.select_one('SELECT * from TEST'))
 

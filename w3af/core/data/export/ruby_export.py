@@ -25,8 +25,7 @@ from w3af.core.data.parsers.doc.http_request_parser import http_request_parser
 
 
 def ruby_escape_string(str_in):
-    str_out = str_in.replace('"', '\\"')
-    return str_out
+    return str_in.replace('"', '\\"')
 
 
 def ruby_export(request_string):

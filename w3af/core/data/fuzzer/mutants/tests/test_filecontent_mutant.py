@@ -65,8 +65,8 @@ class TestFileContentMutant(unittest.TestCase):
         self.assertEqual(m.get_url().url_string, 'http://moth/')
 
         expected_found_at = u'"http://moth/", using HTTP method POST. The'\
-            u' sent post-data was: "...file=abc..."'\
-            u' which modified the uploaded file content.'
+                u' sent post-data was: "...file=abc..."'\
+                u' which modified the uploaded file content.'
         generated_found_at = m.found_at()
 
         self.assertEqual(generated_found_at, expected_found_at)
@@ -162,7 +162,7 @@ class TestFileContentMutant(unittest.TestCase):
         noop = '1' * len(boundary)
 
         expected_data = [encode_as_multipart(f, boundary) for f in expected_forms]
-        expected_data = set([s.replace(boundary, noop) for s in expected_data])
+        expected_data = {s.replace(boundary, noop) for s in expected_data}
 
         generated_forms = [m.get_dc() for m in generated_mutants]
         generated_data = [str(f).replace(f.boundary, noop) for f in generated_forms]

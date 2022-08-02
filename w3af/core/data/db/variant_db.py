@@ -99,8 +99,7 @@ class VariantDB(object):
             # Is the fuzzable request already known to us? (exactly the same)
             #
             request_hash = fuzzable_request.get_request_hash(self.HASH_IGNORE_HEADERS)
-            already_seen = self._variants_eq.get(request_hash, False)
-            if already_seen:
+            if already_seen := self._variants_eq.get(request_hash, False):
                 return False
 
             # Store it to avoid duplicated fuzzable requests in our framework
@@ -118,10 +117,10 @@ class VariantDB(object):
 
             # We've seen at least one fuzzable request with this pattern...
             url = fuzzable_request.get_uri()
-            has_params = url.has_query_string() or fuzzable_request.get_raw_data()
-
-            # Choose which max_variants to use
-            if has_params:
+            if (
+                has_params := url.has_query_string()
+                or fuzzable_request.get_raw_data()
+            ):
                 max_variants = self.params_max_variants
             else:
                 max_variants = self.path_max_variants
@@ -129,8 +128,7 @@ class VariantDB(object):
             if count >= max_variants:
                 return False
 
-            else:
-                self._variants[clean_dict_key] = count + 1
-                return True
+            self._variants[clean_dict_key] = count + 1
+            return True
 
 

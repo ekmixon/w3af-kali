@@ -102,10 +102,7 @@ class WMLParser(SGMLParser):
 
         self._select_tag_name = get_value_by_key(attrs, 'name', 'id')
 
-        if self._select_tag_name:
-            self._inside_select = True
-        else:
-            self._inside_select = False
+        self._inside_select = bool(self._select_tag_name)
 
     def _handle_option_tag_start(self, tag, tag_name, attrs):
         if not self._inside_form:

@@ -78,8 +78,7 @@ class re_multire(object):
 
         for regex_str, compiled_regex in self._re_cache.iteritems():
 
-            matchobj = compiled_regex.search(target_str)
-            if matchobj:
+            if matchobj := compiled_regex.search(target_str):
                 resitem = [matchobj, regex_str, compiled_regex]
 
                 if regex_str in self._assoc_obj:

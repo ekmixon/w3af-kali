@@ -113,7 +113,7 @@ class BaseMultiReTest(unittest.TestCase):
 
         result = mre.query('abc321\x00def123')
         self.assertEqual(2, len(result))
-        match_res = set(i[1] for i in result)
+        match_res = {i[1] for i in result}
         self.assertEqual(set(re_list), match_res)
 
     @only_if_subclass

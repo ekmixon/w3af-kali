@@ -63,5 +63,4 @@ class GenericBloomFilter(object):
         if not os.path.exists(tempdir):
             os.makedirs(tempdir)
         filename = ''.join([choice(string.letters) for _ in range(12)])
-        temp_file = os.path.join(tempdir, filename + '-w3af.bloom')
-        return temp_file
+        return os.path.join(tempdir, f'{filename}-w3af.bloom')

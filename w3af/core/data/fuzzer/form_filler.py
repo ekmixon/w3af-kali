@@ -151,11 +151,10 @@ def smart_fill(variable_name, db=PARAM_NAME_KNOWLEDGE, default='56'):
             if variable_name_db == variable_name:
                 return filled_value
 
-            if variable_name in variable_name_db:
-                match_rate = get_match_rate(variable_name, variable_name_db)
-                possible_results.append((filled_value, match_rate))
-
-            elif variable_name_db in variable_name:
+            if (
+                variable_name in variable_name_db
+                or variable_name_db in variable_name
+            ):
                 match_rate = get_match_rate(variable_name, variable_name_db)
                 possible_results.append((filled_value, match_rate))
 

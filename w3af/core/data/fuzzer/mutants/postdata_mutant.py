@@ -41,8 +41,10 @@ class PostDataMutant(Mutant):
         """
         :return: A string representing WHAT was fuzzed.
         """
-        fmt = '"%s", using HTTP method %s. The sent post-data was: "%s"'
-        fmt += ' which modifies the "%s" parameter.'
+        fmt = (
+            '"%s", using HTTP method %s. The sent post-data was: "%s"'
+            + ' which modifies the "%s" parameter.'
+        )
 
         return fmt % (self.get_uri(), self.get_method(),
                       self.get_dc().get_short_printable_repr(),
@@ -55,9 +57,15 @@ class PostDataMutant(Mutant):
         This is a very important method which is called in order to create
         mutants. Usually called from fuzzer.py module.
         """
-        if not isinstance(freq.get_raw_data(), Form):
-            return []
-
-        return cls._create_mutants_worker(freq, cls, mutant_str_list,
-                                          fuzzable_param_list,
-                                          append, fuzzer_config)
+        return (
+            cls._create_mutants_worker(
+                freq,
+                cls,
+                mutant_str_list,
+                fuzzable_param_list,
+                append,
+                fuzzer_config,
+            )
+            if isinstance(freq.get_raw_data(), Form)
+            else []
+        )

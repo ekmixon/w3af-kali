@@ -53,17 +53,17 @@ class Headers(NonRepeatKeyValueContainer):
         res = []
         splitted_str = headers_str.split('\r\n')
         for one_header_line in splitted_str:
-            
+
             if not one_header_line:
                 continue
-            
+
             name, value = one_header_line.split(':', 1)
-            
+
             # Escape the space after the ":"
             value = value[1:]
-            
+
             res.append((name, value))
-        
+
         return cls(res)
 
     def to_dict(self):
@@ -73,8 +73,7 @@ class Headers(NonRepeatKeyValueContainer):
         return dict([(k.lower(), v) for k, v in self.iteritems()])
 
     def clean_values(self, init_val):
-        if isinstance(init_val, NonRepeatKeyValueContainer)\
-        or isinstance(init_val, dict):
+        if isinstance(init_val, (NonRepeatKeyValueContainer, dict)):
             return init_val
 
         cleaned_vals = []
@@ -85,9 +84,9 @@ class Headers(NonRepeatKeyValueContainer):
             # have multiple header values like query strings and post-data
             if isinstance(value, basestring):
                 value = smart_unicode(value)
-            
+
             cleaned_vals.append((smart_unicode(key), value))
-        
+
         return cleaned_vals
 
     def tokens_to_value(self):

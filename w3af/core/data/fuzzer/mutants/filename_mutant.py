@@ -53,9 +53,10 @@ class FileNameMutant(URLPartsMutant):
         if self._double_encoding:
             encoded = urllib.quote_plus(encoded, safe=self._safe_encode_chars)
 
-        domain_path.set_file_name('%s%s%s' % (self._url_parts_dc.url_start,
-                                              encoded,
-                                              self._url_parts_dc.url_end))
+        domain_path.set_file_name(
+            f'{self._url_parts_dc.url_start}{encoded}{self._url_parts_dc.url_end}'
+        )
+
         return domain_path
 
     get_uri = get_url
@@ -90,7 +91,7 @@ class FileNameMutant(URLPartsMutant):
 
         for idx, fn_chunk in enumerate(fname_chunks):
 
-            if not (fuzzable_param_list == [] or idx in fuzzable_param_list):
+            if fuzzable_param_list != [] and idx not in fuzzable_param_list:
                 continue
 
             for mutant_str in mutant_str_list:

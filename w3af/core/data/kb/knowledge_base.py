@@ -94,11 +94,10 @@ class BasicKnowledgeBase(object):
         :return: True if there is no other info in (location_a, location_b)
                  with the same URL as the info_inst.
         """
-        for saved_vuln in self.get(location_a, location_b):
-            if saved_vuln.get_url() == info_inst.get_url():
-                return False
-
-        return True
+        return all(
+            saved_vuln.get_url() != info_inst.get_url()
+            for saved_vuln in self.get(location_a, location_b)
+        )
 
     def filter_var(self, location_a, location_b, info_inst):
         """
@@ -109,17 +108,18 @@ class BasicKnowledgeBase(object):
         for saved_vuln in self.get(location_a, location_b):
 
             if saved_vuln.get_token_name() == info_inst.get_token_name() and\
-            saved_vuln.get_url() == info_inst.get_url():
+                saved_vuln.get_url() == info_inst.get_url():
 
                 if saved_vuln.get_dc() is None and\
-                info_inst.get_dc() is None:
+                    info_inst.get_dc() is None:
                     return False
 
-                if saved_vuln.get_dc() is not None and\
-                info_inst.get_dc() is not None:
-
-                    if saved_vuln.get_dc().keys() == info_inst.get_dc().keys():
-                        return False
+                if (
+                    saved_vuln.get_dc() is not None
+                    and info_inst.get_dc() is not None
+                    and saved_vuln.get_dc().keys() == info_inst.get_dc().keys()
+                ):
+                    return False
 
         return True
 
@@ -159,12 +159,11 @@ class BasicKnowledgeBase(object):
                     info_set.add(info_inst)
                     self.update(old_info_set, info_set)
                     return info_set, False
-            else:
-                # No pre-existing InfoSet instance matched, let's create one
-                # for the info_inst
-                info_set = group_klass([info_inst])
-                self.append(location_a, location_b, info_set)
-                return info_set, True
+            # No pre-existing InfoSet instance matched, let's create one
+            # for the info_inst
+            info_set = group_klass([info_inst])
+            self.append(location_a, location_b, info_set)
+            return info_set, True
 
     def get_all_vulns(self):
         """
@@ -203,10 +202,7 @@ class BasicKnowledgeBase(object):
         return all_shells
 
     def _get_real_name(self, data):
-        if isinstance(data, basestring):
-            return data
-        else:
-            return data.get_name()
+        return data if isinstance(data, basestring) else data.get_name()
 
     def append(self, location_a, location_b, value):
         """
@@ -323,7 +319,7 @@ class DBKnowledgeBase(BasicKnowledgeBase):
 
             self.db = get_default_persistent_db_instance()
 
-            self.table_name = 'knowledge_base_' + rand_alpha(30)
+            self.table_name = f'knowledge_base_{rand_alpha(30)}'
             self.db.create_table(self.table_name, self.COLUMNS)
             self.db.create_index(self.table_name, ['location_a', 'location_b'])
             self.db.create_index(self.table_name, ['uniq_id'])
@@ -384,8 +380,7 @@ class DBKnowledgeBase(BasicKnowledgeBase):
         result = self.get(location_a, location_b, check_types=True)
 
         if len(result) > 1:
-            msg = 'Incorrect use of get_one(), found %s results.'
-            raise RuntimeError(msg % result)
+            raise RuntimeError(f'Incorrect use of get_one(), found {result} results.')
         elif len(result) == 0:
             return []
         else:
@@ -394,12 +389,10 @@ class DBKnowledgeBase(BasicKnowledgeBase):
     def _get_uniq_id(self, obj):
         if isinstance(obj, (Info, InfoSet)):
             return obj.get_uniq_id()
+        if isinstance(obj, collections.Iterable):
+            return str(hash(''.join([str(hash(i)) for i in obj])))
         else:
-            if isinstance(obj, collections.Iterable):
-                concat_all = ''.join([str(hash(i)) for i in obj])
-                return str(hash(concat_all))
-            else:
-                return str(hash(obj))
+            return str(hash(obj))
 
     @requires_setup
     def append(self, location_a, location_b, value, ignore_type=False):
@@ -408,7 +401,7 @@ class DBKnowledgeBase(BasicKnowledgeBase):
         """
         if not ignore_type and not isinstance(value, (Info, Shell, InfoSet)):
             msg = 'You MUST use raw_write/raw_read to store non-info objects'\
-                  ' to the KnowledgeBase.'
+                      ' to the KnowledgeBase.'
             raise TypeError(msg)
 
         location_a = self._get_real_name(location_a)
@@ -417,7 +410,7 @@ class DBKnowledgeBase(BasicKnowledgeBase):
         pickled_obj = cpickle_dumps(value)
         t = (location_a, location_b, uniq_id, pickled_obj)
 
-        query = "INSERT INTO %s VALUES (?, ?, ?, ?)" % self.table_name
+        query = f"INSERT INTO {self.table_name} VALUES (?, ?, ?, ?)"
         self.db.execute(query, t)
         self._notify_observers(self.APPEND, location_a, location_b, value,
                                ignore_type=ignore_type)
@@ -445,7 +438,7 @@ class DBKnowledgeBase(BasicKnowledgeBase):
             params = (location_a,)
         else:
             query = 'SELECT pickle FROM %s WHERE location_a = ?'\
-                                           ' and location_b = ?'
+                                               ' and location_b = ?'
             params = (location_a, location_b)
 
         result_lst = []
@@ -486,7 +479,7 @@ class DBKnowledgeBase(BasicKnowledgeBase):
 
         if old_not_info or update_not_info:
             msg = 'You MUST use raw_write/raw_read to store non-info objects'\
-                  ' to the KnowledgeBase.'
+                      ' to the KnowledgeBase.'
             raise TypeError(msg)
 
         old_uniq_id = old_info.get_uniq_id()
@@ -503,8 +496,8 @@ class DBKnowledgeBase(BasicKnowledgeBase):
             self._notify_observers(self.UPDATE, old_info, update_info)
         else:
             ex = 'Failed to update() %s instance because' \
-                 ' the original unique_id (%s) does not exist in the DB,' \
-                 ' or the new unique_id (%s) is invalid.'
+                     ' the original unique_id (%s) does not exist in the DB,' \
+                     ' or the new unique_id (%s) is invalid.'
             raise DBException(ex % (old_info.__class__.__name__,
                                     old_uniq_id,
                                     new_uniq_id))
@@ -539,8 +532,7 @@ class DBKnowledgeBase(BasicKnowledgeBase):
         :return: A list of all objects of class == klass that are saved in the
                  kb.
         """
-        query = 'SELECT pickle FROM %s'
-        results = self.db.select(query % self.table_name)
+        results = self.db.select(f'SELECT pickle FROM {self.table_name}')
 
         result_lst = []
 
@@ -557,8 +549,7 @@ class DBKnowledgeBase(BasicKnowledgeBase):
         :return: A list of all info instances with severity in (LOW, MEDIUM,
                  HIGH)
         """
-        query = 'SELECT pickle FROM %s'
-        results = self.db.select(query % self.table_name)
+        results = self.db.select(f'SELECT pickle FROM {self.table_name}')
 
         result_lst = []
 
@@ -576,8 +567,7 @@ class DBKnowledgeBase(BasicKnowledgeBase):
         """
         :return: A list of all info instances with severity eq INFORMATION
         """
-        query = 'SELECT pickle FROM %s'
-        results = self.db.select(query % self.table_name)
+        results = self.db.select(f'SELECT pickle FROM {self.table_name}')
 
         result_lst = []
 
@@ -614,7 +604,7 @@ class DBKnowledgeBase(BasicKnowledgeBase):
         """
         Cleanup internal data.
         """
-        self.db.execute("DELETE FROM %s WHERE 1=1" % self.table_name)
+        self.db.execute(f"DELETE FROM {self.table_name} WHERE 1=1")
 
         # Remove the old, create new.
         old_urls = self.urls

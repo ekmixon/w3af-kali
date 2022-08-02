@@ -47,7 +47,7 @@ class AuditPlugin(Plugin):
 
     def __init__(self):
         Plugin.__init__(self)
-        
+
         self._uri_opener = None
         self._store_kb_vulns = False
         self._audit_return_vulns_lock = threading.RLock()
@@ -97,30 +97,27 @@ class AuditPlugin(Plugin):
         """
         the_stack = inspect.stack()
 
-        for _, _, _, function_name, _, _ in the_stack:
-            if function_name == 'audit_return_vulns':
-                return True
-            
-        return False
+        return any(
+            function_name == 'audit_return_vulns'
+            for _, _, _, function_name, _, _ in the_stack
+        )
 
     def kb_append_uniq(self, location_a, location_b, info):
         """
         kb.kb.append_uniq a vulnerability to the KB
         """
-        if self._store_kb_vulns:
-            if self._audit_return_vulns_in_caller():
-                self._newly_found_vulns.append(info)
-        
+        if self._store_kb_vulns and self._audit_return_vulns_in_caller():
+            self._newly_found_vulns.append(info)
+
         super(AuditPlugin, self).kb_append_uniq(location_a, location_b, info)
         
     def kb_append(self, location_a, location_b, info):
         """
         kb.kb.append a vulnerability to the KB
         """
-        if self._store_kb_vulns:
-            if self._audit_return_vulns_in_caller():
-                self._newly_found_vulns.append(info)
-        
+        if self._store_kb_vulns and self._audit_return_vulns_in_caller():
+            self._newly_found_vulns.append(info)
+
         super(AuditPlugin, self).kb_append(location_a, location_b, info)
 
     def audit_with_copy(self, fuzzable_request, orig_resp):
@@ -191,13 +188,12 @@ class AuditPlugin(Plugin):
 
             vulns = kb.kb.get(pname, kb_varname)
 
-            for vuln in vulns:
-                if vuln.get_token_name() == varname and\
-                mutant.get_dc().keys() == vuln.get_dc().keys() and\
-                are_variants(vuln.get_uri(), mutant.get_uri()):
-                    return False
-                
-            return True
+            return not any(
+                vuln.get_token_name() == varname
+                and mutant.get_dc().keys() == vuln.get_dc().keys()
+                and are_variants(vuln.get_uri(), mutant.get_uri())
+                for vuln in vulns
+            )
 
     def get_type(self):
         return 'audit'

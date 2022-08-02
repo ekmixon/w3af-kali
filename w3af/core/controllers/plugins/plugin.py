@@ -57,7 +57,7 @@ class Plugin(Configurable):
         """
         self._uri_opener = None
         self.worker_pool = None
-        
+
         self.output_queue = Queue.Queue()
         self._plugin_lock = threading.RLock()
 
@@ -103,8 +103,7 @@ class Plugin(Configurable):
         """
         :return: A list of option objects for this plugin.
         """
-        ol = OptionList()
-        return ol
+        return OptionList()
 
     def get_plugin_deps(self):
         """
@@ -118,14 +117,13 @@ class Plugin(Configurable):
         """
         :return: A description of the plugin.
         """
-        if self.__doc__ is not None:
-            tmp = self.__doc__.replace('    ', '')
-            
-            res = ''.join(l for l in tmp.split('\n') if l != '' and
-                          not l.startswith(':'))
-        else:
-            res = 'No description available for this plugin.'
-        return res
+        if self.__doc__ is None:
+            return 'No description available for this plugin.'
+        tmp = self.__doc__.replace('    ', '')
+
+        return ''.join(
+            l for l in tmp.split('\n') if l != '' and not l.startswith(':')
+        )
 
     def get_long_desc(self):
         """
@@ -138,10 +136,9 @@ class Plugin(Configurable):
         """
         kb.kb.append_uniq a vulnerability to the KB
         """
-        added_to_kb = kb.kb.append_uniq(location_a, location_b, info,
-                                        filter_by=filter_by)
-
-        if added_to_kb:
+        if added_to_kb := kb.kb.append_uniq(
+            location_a, location_b, info, filter_by=filter_by
+        ):
             om.out.report_finding(info)
 
     def kb_append_uniq_group(self, location_a, location_b, info,

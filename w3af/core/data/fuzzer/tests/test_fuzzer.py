@@ -53,7 +53,7 @@ class TestFuzzer(unittest.TestCase):
             self.assertIsInstance(item, _type)
 
     def assertAllHaveTokens(self, items):
-        self.assertTrue(all([m.get_token() is not None for m in items]))
+        self.assertTrue(all(m.get_token() is not None for m in items))
 
     def test_simple(self):
         cf_singleton.save('fuzzable_headers', [])
@@ -102,18 +102,18 @@ class TestFuzzer(unittest.TestCase):
 
     def test_special_url_characters(self):
         initial_url = 'http://w3af.org/' \
-                      '?__VIEWSTATE=/' \
-                      '&__EVENTVALIDATION=\\X+W=='\
-                      '&_ctl0:TextBox1=%s'
+                          '?__VIEWSTATE=/' \
+                          '&__EVENTVALIDATION=\\X+W=='\
+                          '&_ctl0:TextBox1=%s'
 
         url = URL(initial_url % '')
         freq = FuzzableRequest(url)
         generated_mutants = create_mutants(freq, self.payloads)
 
         decoded_url = 'http://w3af.org/' \
-                      '?__VIEWSTATE=/' \
-                      '&__EVENTVALIDATION=\\X%%20W=='\
-                      '&_ctl0:TextBox1=%s'
+                          '?__VIEWSTATE=/' \
+                          '&__EVENTVALIDATION=\\X%%20W=='\
+                          '&_ctl0:TextBox1=%s'
 
         expected_urls = [decoded_url % 'abc',
                          decoded_url % 'def']
@@ -338,13 +338,13 @@ class TestFuzzer(unittest.TestCase):
 
         self.assertTrue(all(m.get_method() == 'PUT' for m in mutants))
 
-        expected_uris = {'http://www.w3af.com/?id=abc',
-                         'http://www.w3af.com/?id=def',
-                         'http://www.w3af.com/?id=3',
-                         'http://www.w3af.com/?id=3',
-                         'http://www.w3af.com/?id=3',
-                         'http://www.w3af.com/?id=3'}
-        created_uris = set([i.get_uri().url_string for i in mutants])
+        expected_uris = {
+            'http://www.w3af.com/?id=abc',
+            'http://www.w3af.com/?id=def',
+            'http://www.w3af.com/?id=3',
+        }
+
+        created_uris = {i.get_uri().url_string for i in mutants}
         self.assertEqual(expected_uris, created_uris)
 
         expected_dcs = {'id=abc', 'id=def',
@@ -353,7 +353,7 @@ class TestFuzzer(unittest.TestCase):
                         'username=John8212&address=abc',
                         'username=John8212&address=def'}
 
-        created_dcs = set([str(i.get_dc()) for i in mutants])
+        created_dcs = {str(i.get_dc()) for i in mutants}
         self.assertEqual(created_dcs, expected_dcs)
 
     def test_urlparts_no_path(self):

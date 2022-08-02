@@ -88,16 +88,19 @@ class TestContext(unittest.TestCase):
     def test_all(self):
         for context in get_contexts():
             found = False
-            
+
             expected_context_name = context.get_name()
             for calculated_context in get_context(self.HTML, expected_context_name):
                 if calculated_context.get_name() == expected_context_name:
                     found = True
-            
+
             if not found:
-                msg = 'The analysis for %s context failed, got %r instead.' 
-                msg = msg % (expected_context_name,
-                             get_context(self.HTML, expected_context_name))
+                msg = 'The analysis for %s context failed, got %r instead.'
+                msg %= (
+                    expected_context_name,
+                    get_context(self.HTML, expected_context_name),
+                )
+
                 self.assertTrue(False, msg)
                 
     def test_style_comment_case01(self):

@@ -87,7 +87,7 @@ class DataToken(object):
         elif other is None:
             return False
         else:
-            raise RuntimeError('Can not compare %s with DataToken.' % other)
+            raise RuntimeError(f'Can not compare {other} with DataToken.')
 
     def __reduce__(self):
         return (self.__class__,

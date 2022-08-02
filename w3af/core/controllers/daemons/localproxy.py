@@ -73,25 +73,25 @@ class w3afLocalProxyHandler(w3afProxyHandler):
         # request...
         self.server.w3afLayer.request_queue.put(fuzzable_request)
         edited_requests = self.server.w3afLayer.edited_requests
-        
+
         while True:
-            
-            if not id(fuzzable_request) in edited_requests:
+
+            if id(fuzzable_request) not in edited_requests:
                 time.sleep(0.1)
                 continue
-            
+
             head, body = edited_requests[id(fuzzable_request)]
             del edited_requests[id(fuzzable_request)]
 
             if head == body is None:
                 # The request was dropped by the user. Send 403 and break
                 self.send_response(403)
-                
+
                 self.send_header('Connection', 'close')
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
                 self.wfile.write('The HTTP request was dropped by the user')
-                
+
                 self.rfile.close()
                 self.wfile.close()
                 break
@@ -165,10 +165,7 @@ class w3afLocalProxyHandler(w3afProxyHandler):
         if conf.what_not_to_trap.search(freq.get_url().url_string):
             return False
 
-        if not conf.what_to_trap.search(freq.get_url().url_string):
-            return False
-
-        return True
+        return bool(conf.what_to_trap.search(freq.get_url().url_string))
 
 
 class LocalProxy(Proxy):
@@ -225,7 +222,7 @@ class LocalProxy(Proxy):
 
            If list is empty then we will trap all methods
         """
-        self.methods_to_trap = set(i.upper() for i in methods)
+        self.methods_to_trap = {i.upper() for i in methods}
 
     def set_what_not_to_trap(self, regex):
         """Set regular expression that indicates what URLs TO trap."""

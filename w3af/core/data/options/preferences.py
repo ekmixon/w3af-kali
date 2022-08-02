@@ -38,7 +38,7 @@ class Preferences(object):
         self.sections = {}
         self.options = {}
         if label:
-            self.filename = os.path.join(get_home_dir(), label + '.cfg')
+            self.filename = os.path.join(get_home_dir(), f'{label}.cfg')
 
     def add_section(self, section='default', label=None, options_list=None):
         """Add a section named section to the instance."""
@@ -58,10 +58,7 @@ class Preferences(object):
     def has_option(self, section, option):
         """If the given section exists, and contains the given option, return
         True; otherwise return False."""
-        if section in self.options and option in self.options[section]:
-            return True
-        else:
-            return False
+        return section in self.options and option in self.options[section]
 
     def get(self, section, option):
         """Get an option value for the named section."""

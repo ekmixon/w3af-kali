@@ -66,7 +66,6 @@ class PlainContainer(DataContainer):
         http://stackoverflow.com/questions/13243766/python-empty-generator-function
         """
         return
-        yield
 
     def get_short_printable_repr(self):
         """

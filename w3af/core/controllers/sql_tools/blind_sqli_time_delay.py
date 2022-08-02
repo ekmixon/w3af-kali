@@ -55,10 +55,10 @@ class blind_sqli_time_delay(object):
                 # Now I can be sure that I found a vuln, we control the response
                 # time with the delay
                 desc = 'Blind SQL injection using time delays was found at: %s'
-                desc = desc % mutant.found_at()
-                
+                desc %= mutant.found_at()
+
                 response_ids = [r.id for r in responses]
-                
+
                 v = Vuln.from_mutant('Blind SQL injection vulnerability', desc,
                                      severity.HIGH, response_ids, 'blind_sqli',
                                      mutant)
@@ -78,10 +78,8 @@ class blind_sqli_time_delay(object):
                  unique instances of the delay objects! Adding this to a list
                  that's defined at the class level will bring threading issues
         """
-        res = []
+        res = [ExactDelay("1;waitfor delay '0:0:%s'--")]
 
-        # MSSQL
-        res.append(ExactDelay("1;waitfor delay '0:0:%s'--"))
         res.append(ExactDelay("1);waitfor delay '0:0:%s'--"))
         res.append(ExactDelay("1));waitfor delay '0:0:%s'--"))
         res.append(ExactDelay("1';waitfor delay '0:0:%s'--"))

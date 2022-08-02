@@ -159,7 +159,7 @@ class Mutant(DiskItem):
         token = dc.get_token()
 
         msg = '"%s", using HTTP method %s. The sent data was: "%s"'
-        msg = msg % (self.get_url(), self.get_method(), dc_short)
+        msg %= (self.get_url(), self.get_method(), dc_short)
 
         if token is not None:
             msg += ' The modified parameter was "%s".' % token.get_name()
@@ -196,7 +196,7 @@ class Mutant(DiskItem):
         """
         if not issubclass(mutant_cls, Mutant):
             msg = 'mutant_cls parameter needs to be one of the known mutant'\
-                  ' classes, not %s.'
+                      ' classes, not %s.'
             raise ValueError(msg % mutant_cls)
 
         result = []
@@ -219,9 +219,11 @@ class Mutant(DiskItem):
 
                 # Only fuzz the specified parameters (if any)
                 # or fuzz all of them (the fuzzable_param_list == [] case)
-                if not fuzzable_param_list == []:
-                    if not token.get_name() in fuzzable_param_list:
-                        continue
+                if (
+                    fuzzable_param_list != []
+                    and token.get_name() not in fuzzable_param_list
+                ):
+                    continue
 
                 # Ok, now we have a data container with the mutant string,
                 # but it's possible that all the other fields of the data
@@ -237,14 +239,10 @@ class Mutant(DiskItem):
 
                 if append:
                     if not isinstance(payload, basestring):
-                        # This prevents me from flattening the special type to
-                        # a string in a couple of lines below where I apply the
-                        # string formatting
-                        msg = 'Incorrect payload type %s'
-                        raise RuntimeError(msg % type(payload))
+                        raise RuntimeError(f'Incorrect payload type {type(payload)}')
 
                     original_value = token.get_original_value()
-                    token.set_value('%s%s' % (original_value, payload))
+                    token.set_value(f'{original_value}{payload}')
                 else:
                     token.set_value(payload)
 

@@ -53,7 +53,7 @@ def get_source_code():
         run_cmd('git pull', cwd=DJANGO_MOTH_DIR)
     else:
         # We need to "git clone" the repository
-        run_cmd('git clone %s' % DJANGO_MOTH_REPO)
+        run_cmd(f'git clone {DJANGO_MOTH_REPO}')
         
 
 def install_dependencies():
@@ -66,28 +66,28 @@ def install_dependencies():
     the new dependencies.
     """
     if not os.path.exists(VIRTUALENV_DIR):
-        run_cmd('virtualenv %s' % VIRTUALENV_DIR)
-        
-    run_cmd('%s/bin/pip install -r %s/requirements.txt' % (VIRTUALENV_DIR,
-                                                           DJANGO_MOTH_DIR,))
+        run_cmd(f'virtualenv {VIRTUALENV_DIR}')
+
+    run_cmd(
+        f'{VIRTUALENV_DIR}/bin/pip install -r {DJANGO_MOTH_DIR}/requirements.txt'
+    )
 
 
 def start_daemons(log_directory=ARTIFACTS_DIR):
     """
     Start the django application in HTTP and HTTPS.
     """
-    cmd = '%s/bin/python %s/start_daemons.py --log-directory=%s' % (VIRTUALENV_DIR,
-                                                                    DJANGO_MOTH_DIR,
-                                                                    log_directory)
+    cmd = f'{VIRTUALENV_DIR}/bin/python {DJANGO_MOTH_DIR}/start_daemons.py --log-directory={log_directory}'
+
     run_cmd(cmd)
 
 
 def run_cmd(cmd, cwd=None):
     cwd = cwd if cwd is not None else os.getcwd()
-    logging.debug('[s] %s (cwd: %s)' % (cmd, cwd))
+    logging.debug(f'[s] {cmd} (cwd: {cwd})')
     p = subprocess.Popen(shlex.split(cmd), cwd=cwd)
     p.wait()
-    logging.debug('[e] %s (retcode: %s) (cwd: %s)' % (cmd, p.returncode, cwd))
+    logging.debug(f'[e] {cmd} (retcode: {p.returncode}) (cwd: {cwd})')
     return p.returncode
 
 

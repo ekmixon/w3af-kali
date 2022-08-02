@@ -49,16 +49,15 @@ def dc_from_hdrs_post(headers, post_data):
             return pdc_klass.from_postdata(headers, post_data)
         except (ValueError, TypeError) as e:
             pass
-    else:
-        content_type, _ = headers.iget('content-type', 'None')
-        msg = 'Unknown post-data. Content-type: "%s" and/or post-data "%s"'
-        om.out.debug(msg % (content_type, post_data[:50]))
+    content_type, _ = headers.iget('content-type', 'None')
+    msg = 'Unknown post-data. Content-type: "%s" and/or post-data "%s"'
+    om.out.debug(msg % (content_type, post_data[:50]))
 
-        # These lines are for debugging
-        #import traceback
-        #traceback.print_stack()
+    # These lines are for debugging
+    #import traceback
+    #traceback.print_stack()
 
-        return PlainContainer.from_postdata(headers, post_data)
+    return PlainContainer.from_postdata(headers, post_data)
 
 
 def dc_from_form_params(form_parameters):

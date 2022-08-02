@@ -66,7 +66,7 @@ class w3af_core_target(Configurable):
         o = opt_factory('target', targets, d, 'url_list')
         ol.add(o)
 
-        d = 'Target operating system (%s)' % '/'.join(self._operating_systems)
+        d = f"Target operating system ({'/'.join(self._operating_systems)})"
         h = 'This setting is here to enhance w3af performance.'
 
         # This list "hack" has to be done because the default value is the one
@@ -78,7 +78,7 @@ class w3af_core_target(Configurable):
         ol.add(o)
 
         frameworks = '/'.join(self._programming_frameworks)
-        d = 'Target programming framework (%s)' % frameworks
+        d = f'Target programming framework ({frameworks})'
         h = 'This setting is here to enhance w3af performance.'
         # This list "hack" has to be done because the default value is the one
         # in the first position on the list
@@ -123,7 +123,7 @@ class w3af_core_target(Configurable):
         """
         configured_target_urls = options_list['target'].get_value()
         target_urls = []
-        
+
         for target_url in configured_target_urls:
 
             self._verify_url(target_url)
@@ -131,7 +131,7 @@ class w3af_core_target(Configurable):
             if not target_url.url_string.count('file:///'):
                 # It's a common URL just like http://w3af.com/
                 target_urls.append(target_url)
-                
+
             else:
                 try:
                     f = urllib2.urlopen(target_url.url_string)
@@ -160,16 +160,16 @@ class w3af_core_target(Configurable):
         domain_list = [target_url.get_net_location() for target_url in
                        target_urls]
         domain_list = list(set(domain_list))
-        
+
         if len(domain_list) > 1:
             msg = 'You specified more than one target domain: %s.'\
-                  ' And w3af can only scan one target domain at a time.'
+                      ' And w3af can only scan one target domain at a time.'
             raise BaseFrameworkException(msg % ', '.join(domain_list))
 
         # Save in the config, the target URLs, this may be useful for some
         # plugins
         cf.cf.save('targets', target_urls)
-        cf.cf.save('target_domains', list(set([u.get_domain() for u in target_urls])))
+        cf.cf.save('target_domains', list({u.get_domain() for u in target_urls}))
         cf.cf.save('baseURLs', [i.base_url() for i in target_urls])
 
         # Advanced target selection

@@ -57,26 +57,24 @@ def relative_distance_boolean(a_str, b_str, threshold=0.6):
     if blen == alen and a_str == b_str and threshold <= 1.0:
         return True
 
-    ratio = float(blen) / alen
-
     last_ratio, last_bound = UPPER_BOUNDS[-1]
 
     if threshold < last_bound:
         # Bad, we can't optimize anything here
         return relative_distance(a_str, b_str) >= threshold
-    else:
-        if last_ratio < ratio:
-            # Good, we know the upper bound
+    ratio = float(blen) / alen
+
+    if last_ratio < ratio:
+        # Good, we know the upper bound
+        return False
+    # We have to step through
+    for size_ratio, bound in UPPER_BOUNDS:
+        if size_ratio > ratio:
+            # Bad: we have to do the relative_distance
+            return relative_distance(a_str, b_str) >= threshold
+        elif bound < threshold:
+            # Good: We found an upper bound
             return False
-        else:
-            # We have to step through
-            for size_ratio, bound in UPPER_BOUNDS:
-                if size_ratio > ratio:
-                    # Bad: we have to do the relative_distance
-                    return relative_distance(a_str, b_str) >= threshold
-                elif bound < threshold:
-                    # Good: We found an upper bound
-                    return False
 
 
 def fuzzy_equal(a_str, b_str, threshold=0.6):

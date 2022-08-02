@@ -126,7 +126,7 @@ class KeyValueContainer(DataContainer, OrderedDict):
         for key, value_list in self.items():
             for value in value_list:
                 value = smart_unicode(value, encoding=UTF8, errors=errors)
-                to_app = u'%s%s%s' % (key, key_val_sep, value)
+                to_app = f'{key}{key_val_sep}{value}'
                 lst.append(to_app)
 
         return pair_sep.join(lst)
@@ -138,15 +138,14 @@ class KeyValueContainer(DataContainer, OrderedDict):
         if len(filter_non_printable(str(self))) <= self.MAX_PRINTABLE:
             return filter_non_printable(str(self))
 
-        if self.get_token() is not None:
-            # I want to show the token variable and value in the output
-            for k, v in self.items():
-                for ele in v:
-                    if isinstance(ele, DataToken):
-                        dt_str = '%s=%s' % (filter_non_printable(ele.get_name()),
-                                            filter_non_printable(ele.get_value()))
-                        return '...%s...' % dt_str[:self.MAX_PRINTABLE]
-        else:
+        if self.get_token() is None:
             # I'll simply show the first N parameter and values until the
             # MAX_PRINTABLE is achieved
             return filter_non_printable(str(self))[:self.MAX_PRINTABLE]
+            # I want to show the token variable and value in the output
+        for k, v in self.items():
+            for ele in v:
+                if isinstance(ele, DataToken):
+                    dt_str = f'{filter_non_printable(ele.get_name())}={filter_non_printable(ele.get_value())}'
+
+                    return f'...{dt_str[:self.MAX_PRINTABLE]}...'

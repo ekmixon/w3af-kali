@@ -78,6 +78,5 @@ class LogSink(object):
         """
         if name in self.METHODS:
             return functools.partial(self._add_to_queue, name)
-        else:
-            msg = "'LogSink' object has no attribute '%s'"
-            raise AttributeError(msg % name)
+        msg = "'LogSink' object has no attribute '%s'"
+        raise AttributeError(msg % name)

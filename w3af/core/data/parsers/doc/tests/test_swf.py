@@ -48,7 +48,7 @@ class TestSWFParser(unittest.TestCase):
                                 URL('http://moth/xyz/'),
                                 URL('http://moth/xyz/'),
                                 _id=1)
-        
+
         parser = SWFParser(response)
         parser.parse()
         return parser

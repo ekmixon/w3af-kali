@@ -37,27 +37,27 @@ class TestIsSourceFile(unittest.TestCase):
     def test_no_code_case01(self):
         source = 'foo <?php echo "bar'
         match, lang = is_source_file(source)
-        
+
         self.assertEqual(match, None)
         self.assertEqual(lang, None)
     
     def test_no_code_case02(self):
         source = 'foo <?xml ?> "bar'
         match, lang = is_source_file(source)
-        
+
         self.assertEqual(match, None)
         self.assertEqual(lang, None)
 
     def test_no_code_case03(self):
         source = 'foo <?php xpacket ?> "bar'
         match, lang = is_source_file(source)
-        
+
         self.assertEqual(match, None)
         self.assertEqual(lang, None)
 
     def test_code_case04(self):
         source = 'foo <?php ypacket ?> "bar'
         match, lang = is_source_file(source)
-        
+
         self.assertNotEqual(match, None)
         self.assertEqual(lang, 'PHP')

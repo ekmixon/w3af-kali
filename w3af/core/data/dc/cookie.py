@@ -37,7 +37,7 @@ class Cookie(KeyValueContainer):
 
         super(Cookie, self).__init__(encoding=encoding)
 
-        for k, v in KEY_VALUE_RE.findall(cookie_str + ';'):
+        for k, v in KEY_VALUE_RE.findall(f'{cookie_str};'):
             k = k.strip()
             v = v.strip()
 
@@ -66,7 +66,7 @@ class Cookie(KeyValueContainer):
         for token in self.iter_tokens():
             ks = self._sanitize(str(token.get_name()))
             vs = self._sanitize(str(token.get_value()))
-            cookie_pairs.append('%s=%s' % (ks, vs))
+            cookie_pairs.append(f'{ks}={vs}')
 
         return '; '.join(cookie_pairs)
 
@@ -80,14 +80,14 @@ class Cookie(KeyValueContainer):
         """
         Create a cookie object from an HTTP response.
         """
-        cookies = []
-
         # Get data from RESPONSE
         response_headers = http_response.get_headers()
 
-        for hname, hvalue in response_headers.iteritems():
-            if 'cookie' in hname.lower():
-                cookies.append(hvalue)
+        cookies = [
+            hvalue
+            for hname, hvalue in response_headers.iteritems()
+            if 'cookie' in hname.lower()
+        ]
 
         cookie_inst = cls(''.join(cookies))
 

@@ -180,14 +180,11 @@ class TestMutant(unittest.TestCase):
         _, gif_file_content, _ = get_file_from_template('gif')
         gif_named_stringio = NamedStringIO(gif_file_content, 'upload.gif')
 
-        expected_forms = []
-
         form = MultipartContainer(copy.deepcopy(form_params))
         form['image'] = [gif_named_stringio]
         form['username'] = ['def']
         form['address'] = ['Bonsai Street 123']
-        expected_forms.append(form)
-
+        expected_forms = [form]
         form = MultipartContainer(copy.deepcopy(form_params))
         form['image'] = [gif_named_stringio]
         form['username'] = ['abc']
@@ -228,7 +225,7 @@ class TestMutant(unittest.TestCase):
         noop = '1' * len(boundary)
 
         expected_data = [encode_as_multipart(f, boundary) for f in expected_forms]
-        expected_data = set([s.replace(boundary, noop) for s in expected_data])
+        expected_data = {s.replace(boundary, noop) for s in expected_data}
 
         generated_forms = [m.get_dc() for m in generated_mutants]
         generated_data = [str(f).replace(f.boundary, noop) for f in generated_forms]

@@ -44,8 +44,8 @@ class TestFileNameMutant(unittest.TestCase):
                          u'http://www.w3af.com/foo/ping%21.htm')
 
         expected_found_at = '"http://www.w3af.com/foo/ping%21.htm", using HTTP'\
-                            ' method GET. The modified parameter was the URL'\
-                            ' filename, with value: "ping!".'
+                                ' method GET. The modified parameter was the URL'\
+                                ' filename, with value: "ping!".'
         generated_found_at = m.found_at()
 
         self.assertEqual(generated_found_at, expected_found_at)
@@ -110,5 +110,5 @@ class TestFileNameMutant(unittest.TestCase):
                          'http://www.w3af.com/bar.http%3A//127.0.0.1%3A8015/test/']
 
         generated_urls = [m.get_url().url_string for m in generated_mutants]
-        
+
         self.assertEqual(set(expected_urls), set(generated_urls))

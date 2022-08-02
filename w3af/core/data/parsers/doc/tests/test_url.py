@@ -152,10 +152,6 @@ class TestURLParser(unittest.TestCase):
                ' it shows the problem: id=1%2B2 and then id=1%202')
         raise SkipTest(msg)
 
-        qs_value = self.decode_get_qs(u'http://w3af.com/?id=1%2B2')
-        expected = u'1+2'
-        self.assertEqual(qs_value, expected)
-
     #
     #    Encode tests
     #
@@ -243,10 +239,10 @@ class TestURLParser(unittest.TestCase):
     
     def test_get_directories_fname_qs(self):
         expected = [u'http://w3af.com/']
-        
+
         result = [i.url_string for i in URL('http://w3af.com/def.html?id=5').get_directories()]
         self.assertEqual(result, expected)
-        
+
         result = [i.url_string for i in URL('http://w3af.com/def.html?id=/').get_directories()]
         self.assertEqual(result, expected)
 
@@ -886,7 +882,7 @@ class TestURLParser(unittest.TestCase):
     def test_iter(self):
         url = u'http://w3af.com/xyz.txt;id=1?file=2'
         url_obj = URL(url)
-        self.assertEqual(''.join(chr for chr in url_obj), url)
+        self.assertEqual(''.join(url_obj), url)
 
     def test_hash_diff(self):
         u1 = URL('http://w3af.com/')
@@ -913,11 +909,11 @@ class TestURLParser(unittest.TestCase):
 
     def test_add(self):
         u = URL('http://www.w3af.com/')
-        x = u + 'abc'
+        x = f'{u}abc'
         self.assertEqual(x, u'http://www.w3af.com/abc')
 
         u = URL('http://www.w3af.com/')
-        x = u + ' hello world!'
+        x = f'{u} hello world!'
         self.assertEqual(x, u'http://www.w3af.com/ hello world!')
 
         u = URL('http://www.w3af.com/')
@@ -925,11 +921,11 @@ class TestURLParser(unittest.TestCase):
     
     def test_radd(self):
         u = URL('http://www.w3af.com/')
-        x = 'abc' + u
+        x = f'abc{u}'
         self.assertEqual(x, u'abchttp://www.w3af.com/')
 
         u = URL('http://www.w3af.com/')
-        x = 'hello world! ' + u
+        x = f'hello world! {u}'
         self.assertEqual(x, u'hello world! http://www.w3af.com/')
 
         u = URL('http://www.w3af.com/')
@@ -947,10 +943,10 @@ class TestURLParser(unittest.TestCase):
     #
     def test_memoized(self):
         u = URL('http://www.w3af.com/')
-        self.assertEqual(u._cache, dict())
+        self.assertEqual(u._cache, {})
 
         url = u.uri2url()
-        self.assertNotEqual(u._cache, dict())
+        self.assertNotEqual(u._cache, {})
         self.assertIn(url, u._cache.values())
 
         second_url = u.uri2url()

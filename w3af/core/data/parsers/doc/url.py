@@ -63,10 +63,9 @@ def memoized(meth):
 
         if result is not None:
             return result
-        else:
-            value = meth(self, *args, **kwargs)
-            self._cache[meth] = value
-            return value
+        value = meth(self, *args, **kwargs)
+        self._cache[meth] = value
+        return value
 
     return cache_wrapper
 
@@ -197,7 +196,7 @@ class URL(DiskItem):
         self._encoding = encoding
 
         if not isinstance(data, basestring):
-            raise ValueError('Can not build a URL from %s.' % type(data))
+            raise ValueError(f'Can not build a URL from {type(data)}.')
 
         # Verify that the encoding is a valid one. If we don't do it here,
         # things might get crazy afterwards.
@@ -249,7 +248,7 @@ class URL(DiskItem):
         params = params or u''
         qs = qs or u''
         fragment = fragment or u'' 
-        
+
         data = (scheme, netloc, path, params, qs, fragment)
         url_str = urlparse.urlunparse(data)
         return cls(url_str, encoding)
@@ -401,7 +400,7 @@ class URL(DiskItem):
         # 'net_location' beginning in the last appearance of ':'
         at_symb_index = net_location.rfind('@')
         colon_symb_max_index = net_location.rfind(':')
-        
+
         # Found
         if colon_symb_max_index > at_symb_index:
 
@@ -419,16 +418,16 @@ class URL(DiskItem):
 
             if int(port) > 65535 or int(port) < 1:
                 msg = 'Invalid TCP port "%s", expected a number in range'\
-                      ' 1-65535.'
+                          ' 1-65535.'
                 raise ValueError(msg % port)
-            
+
             # Collapse port
             if (protocol == 'http' and port == '80') or \
-            (protocol == 'https' and port == '443'):
+                (protocol == 'https' and port == '443'):
                 net_location = host
             else:
                 # The net location has a specific port definition
-                net_location = host + ':' + port
+                net_location = f'{host}:{port}'
 
         # Now normalize the path:
         path = self.path
@@ -440,9 +439,8 @@ class URL(DiskItem):
                 continue
             elif p != '..':
                 tokens.append(p)
-            else:
-                if tokens:
-                    tokens.pop()
+            elif tokens:
+                tokens.pop()
         self.path = '/'.join(tokens) + ('/' if trailer_slash else '')
 
         #
@@ -498,21 +496,18 @@ class URL(DiskItem):
         """
         resp_encoding = encoding if encoding is not None else self._encoding
         joined_url = urlparse.urljoin(self.url_string, relative)
-        jurl_obj = URL(joined_url, resp_encoding)
-
         # There is no need to call normalize_url here, since it is called in the
         # URL object __init__
         #
         #jurl_obj.normalize_url()
 
-        return jurl_obj
+        return URL(joined_url, resp_encoding)
 
     def get_domain(self):
         """
         :return: Returns the domain name for the url.
         """
-        domain = self.netloc.split(':')[0]
-        return domain
+        return self.netloc.split(':')[0]
 
     @set_changed
     def set_domain(self, new_domain):
@@ -599,21 +594,16 @@ class URL(DiskItem):
         def decompose_uri():
             return split_authority(self.get_domain())[1]
 
-        if is_ip_address(self.netloc):
-            # An IP address has no "root domain"
-            return self.netloc
-        else:
-            return decompose_uri()
+        return self.netloc if is_ip_address(self.netloc) else decompose_uri()
 
     def get_domain_path(self):
         """
         :return: Returns the domain name and the path for the url.
         """
         if self.path:
-            res = self.scheme + '://' + self.netloc + \
-                self.path[:self.path.rfind('/') + 1]
+            res = (f'{self.scheme}://{self.netloc}' + self.path[:self.path.rfind('/') + 1])
         else:
-            res = self.scheme + '://' + self.netloc + '/'
+            res = f'{self.scheme}://{self.netloc}/'
         return URL(res, self._encoding)
 
     def get_file_name(self):
@@ -628,7 +618,7 @@ class URL(DiskItem):
         :return: Sets the filename name for the given URL.
         """
         if self.path == '/':
-            self.path = '/' + new
+            self.path = f'/{new}'
 
         else:
             last_slash = self.path.rfind('/')
@@ -640,10 +630,7 @@ class URL(DiskItem):
         """
         fname = self.get_file_name()
         extension = fname[fname.rfind('.') + 1:]
-        if extension == fname:
-            return ''
-        else:
-            return extension
+        return '' if extension == fname else extension
 
     @set_changed
     def set_extension(self, extension):
@@ -692,9 +679,9 @@ class URL(DiskItem):
         """
         res = self.path
         if self.params != '':
-            res += ';' + self.params
+            res += f';{self.params}'
         if self.has_query_string():
-            res += u'?' + unicode(self.querystring)
+            res += f'?{unicode(self.querystring)}'
         return res
 
     def url_decode(self):
@@ -722,7 +709,7 @@ class URL(DiskItem):
         qs_start_index = self_str.find('?')
 
         if qs_start_index > -1:
-            qs = '?' + str(self.querystring)
+            qs = f'?{str(self.querystring)}'
             self_str = self_str[:qs_start_index]
 
         return "%s%s" % (urllib.quote(self_str, safe=self.SAFE_CHARS), qs)
@@ -731,11 +718,8 @@ class URL(DiskItem):
         """
         Get a list of all directories and subdirectories.
         """
-        res = []
-
         current_url = self.copy()
-        res.append(current_url.get_domain_path())
-
+        res = [current_url.get_domain_path()]
         while current_url.get_path().count('/') != 1:
             current_url = current_url.url_join('../')
             res.append(current_url)
@@ -748,9 +732,7 @@ class URL(DiskItem):
 
         :return: True if the URL has params.
         """
-        if self.params != '':
-            return True
-        return False
+        return self.params != ''
 
     def get_params_string(self):
         """
@@ -855,7 +837,7 @@ class URL(DiskItem):
         """
         if not isinstance(other, basestring):
             msg = "cannot concatenate '%s' and '%s' objects"
-            msg = msg % (other.__class__.__name__, self.__class__.__name__)
+            msg %= (other.__class__.__name__, self.__class__.__name__)
             raise TypeError(msg)
 
         return self.url_string + other
@@ -872,7 +854,7 @@ class URL(DiskItem):
         """
         if not isinstance(other, basestring):
             msg = "cannot concatenate '%s' and '%s' objects"
-            msg = msg % (other.__class__.__name__, self.__class__.__name__)
+            msg %= (other.__class__.__name__, self.__class__.__name__)
             raise TypeError(msg)
 
         return other + self.url_string

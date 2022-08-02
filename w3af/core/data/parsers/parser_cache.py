@@ -102,7 +102,6 @@ class ParserCache(CacheStats):
         parser = self._cache.get(hash_string, None)
         if parser is not None:
             self._handle_cache_hit(hash_string)
-            return parser
         else:
             # Not in cache, have to work.
             self._handle_cache_miss(hash_string)
@@ -118,8 +117,7 @@ class ParserCache(CacheStats):
                 msg = 'There is no parser for "%s".' % http_response.get_url()
                 raise BaseFrameworkException(msg)
             else:
-                save_to_cache = self.should_cache(http_response) and cache
-                if save_to_cache:
+                if save_to_cache := self.should_cache(http_response) and cache:
                     self._cache[hash_string] = parser
                 else:
                     self._handle_no_cache(hash_string)
@@ -127,7 +125,8 @@ class ParserCache(CacheStats):
                 event.set()
                 self._parser_finished_events.pop(hash_string, None)
 
-            return parser
+
+        return parser
 
 
 @atexit.register

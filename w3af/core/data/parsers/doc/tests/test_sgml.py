@@ -146,10 +146,7 @@ class TestSGMLParser(unittest.TestCase):
         """
         def islower(s):
             il = False
-            if isinstance(s, basestring):
-                il = s.islower()
-            else:
-                il = all(k.islower() for k in s)
+            il = s.islower() if isinstance(s, basestring) else all(k.islower() for k in s)
             assert il, "'%s' is not lowered-case" % s
             return il
 
@@ -240,21 +237,6 @@ class TestSGMLParser(unittest.TestCase):
 
         raise SkipTest('Not sure why this one is failing :S')
 
-        for lang_desc, (body, encoding) in TEST_RESPONSES.iteritems():
-            encoding_header = 'text/html; charset=%s' % encoding
-            headers = Headers([('Content-Type', encoding_header)])
-
-            encoded_body = body.encode(encoding)
-            r = build_http_response(self.url, encoded_body, headers)
-
-            p = SGMLParser(r)
-            p.parse()
-
-            ct_body = p.get_clear_text_body()
-
-            # These test strings don't really have tags, so they should be eq
-            self.assertEqual(ct_body, body)
-
     def test_get_clear_text_issue_4402(self):
         """
         :see: https://github.com/andresriancho/w3af/issues/4402
@@ -267,7 +249,7 @@ class TestSGMLParser(unittest.TestCase):
         sample_encodings.extend(['', 'utf-8'])
 
         for encoding in sample_encodings:
-            encoding_header = 'text/html; charset=%s' % encoding
+            encoding_header = f'text/html; charset={encoding}'
             headers = Headers([('Content-Type', encoding_header)])
 
             r = build_http_response(self.url, body, headers)

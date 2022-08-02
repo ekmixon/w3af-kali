@@ -149,7 +149,7 @@ class CoreStrategy(object):
 
         for consumer in consumers:
 
-            consumer_inst = getattr(self, '_%s_consumer' % consumer)
+            consumer_inst = getattr(self, f'_{consumer}_consumer')
 
             if consumer_inst is not None:
                 # Set it immediately to None to avoid any race conditions where
@@ -159,7 +159,7 @@ class CoreStrategy(object):
                 # The getattr/setattr tricks are required to make sure that "the
                 # real consumer instance" is set to None. Do not modify unless
                 # you know what you're doing!
-                setattr(self, '_%s_consumer' % consumer, None)
+                setattr(self, f'_{consumer}_consumer', None)
 
                 consumer_inst.terminate()
 
@@ -416,9 +416,7 @@ class CoreStrategy(object):
             * Set the Queue in xurllib
             * Start the consumer
         """
-        grep_plugins = self._w3af_core.plugins.plugins['grep']
-
-        if grep_plugins:
+        if grep_plugins := self._w3af_core.plugins.plugins['grep']:
             self._grep_consumer = grep(grep_plugins, self._w3af_core)
             grep_qput = self._grep_consumer.in_queue_put
             self._w3af_core.uri_opener.set_grep_queue_put(grep_qput)
@@ -473,9 +471,7 @@ class CoreStrategy(object):
         The input queue for this consumer is populated by the fuzzable request
         router.
         """
-        bruteforce_plugins = self._w3af_core.plugins.plugins['bruteforce']
-
-        if bruteforce_plugins:
+        if bruteforce_plugins := self._w3af_core.plugins.plugins['bruteforce']:
             self._bruteforce_consumer = bruteforce(bruteforce_plugins,
                                                    self._w3af_core)
             self._bruteforce_consumer.start()
@@ -497,9 +493,7 @@ class CoreStrategy(object):
         performing any step, the developer needs to run the force_auth_login()
         method.
         """
-        auth_plugins = self._w3af_core.plugins.plugins['auth']
-
-        if auth_plugins:
+        if auth_plugins := self._w3af_core.plugins.plugins['auth']:
             self._auth_consumer = auth(auth_plugins, self._w3af_core, timeout)
             self._auth_consumer.start()
             self._auth_consumer.force_login()
@@ -510,8 +504,6 @@ class CoreStrategy(object):
         """
         om.out.debug('Called _setup_audit()')
 
-        audit_plugins = self._w3af_core.plugins.plugins['audit']
-
-        if audit_plugins:
+        if audit_plugins := self._w3af_core.plugins.plugins['audit']:
             self._audit_consumer = audit(audit_plugins, self._w3af_core)
             self._audit_consumer.start()

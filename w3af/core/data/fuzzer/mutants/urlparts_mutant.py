@@ -90,9 +90,10 @@ class URLPartsMutant(Mutant):
         if self._double_encoding:
             encoded = urllib.quote_plus(encoded, safe=self._safe_encode_chars)
 
-        domain_path.set_path('%s%s%s' % (self._url_parts_dc.url_start,
-                                         encoded,
-                                         self._url_parts_dc.url_end))
+        domain_path.set_path(
+            f'{self._url_parts_dc.url_start}{encoded}{self._url_parts_dc.url_end}'
+        )
+
         return domain_path
 
     get_uri = get_url

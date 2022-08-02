@@ -43,11 +43,11 @@ def task_decorator(method):
     Makes sure that for each task we call _add_task() and _task_done()
     which will avoid some ugly race conditions.
     """
-    
+
     @wraps(method)
     def _wrapper(self, *args, **kwds):
         rnd_id = random.randint(1, MAX_RAND)
-        function_id = '%s_%s' % (method.__name__, rnd_id)
+        function_id = f'{method.__name__}_{rnd_id}'
 
         self._add_task(function_id)
 
@@ -59,7 +59,7 @@ def task_decorator(method):
         else:
             self._task_done(function_id)
             return result
-    
+
     return _wrapper
 
 
@@ -79,11 +79,11 @@ class BaseConsumer(Process):
         :param thread_name: How to name the current thread
         :param create_pool: True to create a worker pool for this consumer
         """
-        super(BaseConsumer, self).__init__(name='%sController' % thread_name)
+        super(BaseConsumer, self).__init__(name=f'{thread_name}Controller')
 
         self.in_queue = QueueSpeed()
         self._out_queue = Queue.Queue()
-        
+
         self._consumer_plugins = consumer_plugins
         self._w3af_core = w3af_core
         self._observers = []
@@ -94,8 +94,11 @@ class BaseConsumer(Process):
         self._threadpool = None
 
         if create_pool:
-            self._threadpool = Pool(10, worker_names='%sWorker' % thread_name,
-                                    max_queued_tasks=max_pool_queued_tasks)
+            self._threadpool = Pool(
+                10,
+                worker_names=f'{thread_name}Worker',
+                max_queued_tasks=max_pool_queued_tasks,
+            )
 
     def run(self):
         """
@@ -178,7 +181,7 @@ class BaseConsumer(Process):
         try:
             self._tasks_in_progress.pop(function_id)
         except KeyError:
-            raise AssertionError('The function %s was not found!' % function_id)
+            raise AssertionError(f'The function {function_id} was not found!')
 
     def _add_task(self, function_id):
         """
@@ -205,7 +208,7 @@ class BaseConsumer(Process):
                  is still doing something that might impact on out_queue.
         """
         if self.in_queue_size() > 0 \
-        or self.out_queue.qsize() > 0:
+            or self.out_queue.qsize() > 0:
             return True
 
         if len(self._tasks_in_progress) > 0:
@@ -214,12 +217,14 @@ class BaseConsumer(Process):
         # This is a special case which loosely translates to: "If there are any
         # pending tasks in the threadpool, even if they haven't yet called the
         # _add_task method, we know we have pending work to do".
-        if hasattr(self, '_threadpool') and self._threadpool is not None:
-            if self._threadpool._inqueue.qsize() > 0 \
-            or self._threadpool._outqueue.qsize() > 0:
-                return True
-        
-        return False
+        return bool(
+            hasattr(self, '_threadpool')
+            and self._threadpool is not None
+            and (
+                self._threadpool._inqueue.qsize() > 0
+                or self._threadpool._outqueue.qsize() > 0
+            )
+        )
 
     @property
     def out_queue(self):

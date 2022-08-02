@@ -71,19 +71,22 @@ def get_versions():
                '  GTK version: %s\n'\
                '  PyGTK version: %s\n'\
                '  w3af version:\n    %s'
-    
+
     w3af_version = '\n    '.join(get_w3af_version().split('\n'))
-    
-    versions = versions % (sys.version.replace('\n', ''),
-                           gtk_version,
-                           pygtk_version,
-                           w3af_version)
-        
+
+    versions %= (
+        sys.version.replace('\n', ''),
+        gtk_version,
+        pygtk_version,
+        w3af_version,
+    )
+
+
     return versions
 
 
 def create_crash_file(exception):
-    filename = "w3af-crash-" + rand_alnum(5) + ".txt"
+    filename = f"w3af-crash-{rand_alnum(5)}.txt"
     filename = os.path.join(gettempdir(), filename)
     crash_dump = file(filename, "w")
     crash_dump.write(_('Submit this bug here: https://github.com/andresriancho/w3af/issues/new \n'))

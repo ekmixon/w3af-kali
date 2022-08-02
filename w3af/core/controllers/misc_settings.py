@@ -42,40 +42,41 @@ class MiscSettings(Configurable):
         #
         # User configured variables
         #
-        if cf.cf.get('fuzz_cookies') is None:
-            # It's the first time I'm run
-            cf.cf.save('fuzz_cookies', False)
-            cf.cf.save('fuzz_form_files', True)
-            cf.cf.save('fuzzed_files_extension', 'gif')
-            cf.cf.save('fuzz_url_filenames', False)
-            cf.cf.save('fuzz_url_parts', False)
-            cf.cf.save('fuzzable_headers', [])
+        if cf.cf.get('fuzz_cookies') is not None:
+            return
+        # It's the first time I'm run
+        cf.cf.save('fuzz_cookies', False)
+        cf.cf.save('fuzz_form_files', True)
+        cf.cf.save('fuzzed_files_extension', 'gif')
+        cf.cf.save('fuzz_url_filenames', False)
+        cf.cf.save('fuzz_url_parts', False)
+        cf.cf.save('fuzzable_headers', [])
 
-            cf.cf.save('form_fuzzing_mode', 'tmb')
+        cf.cf.save('form_fuzzing_mode', 'tmb')
 
-            cf.cf.save('max_discovery_time', 120)
+        cf.cf.save('max_discovery_time', 120)
 
-            cf.cf.save('msf_location', '/opt/metasploit3/bin/')
+        cf.cf.save('msf_location', '/opt/metasploit3/bin/')
 
-            #
-            #
-            #
-            ifname = get_net_iface()
-            cf.cf.save('interface', ifname)
+        #
+        #
+        #
+        ifname = get_net_iface()
+        cf.cf.save('interface', ifname)
 
-            #
-            # This doesn't send any packets, and gives you a nice default
-            # setting. In most cases, it is the "public" IP address, which will
-            # work perfectly in all plugins that need a reverse connection
-            # (rfi_proxy)
-            #
-            local_address = get_local_ip()
-            if not local_address:
-                local_address = '127.0.0.1'  # do'h!
+        #
+        # This doesn't send any packets, and gives you a nice default
+        # setting. In most cases, it is the "public" IP address, which will
+        # work perfectly in all plugins that need a reverse connection
+        # (rfi_proxy)
+        #
+        local_address = get_local_ip()
+        if not local_address:
+            local_address = '127.0.0.1'  # do'h!
 
-            cf.cf.save('local_ip_address', local_address)
-            cf.cf.save('non_targets', [])
-            cf.cf.save('stop_on_first_exception', False)
+        cf.cf.save('local_ip_address', local_address)
+        cf.cf.save('non_targets', [])
+        cf.cf.save('stop_on_first_exception', False)
 
     def get_options(self):
         """
@@ -163,7 +164,7 @@ class MiscSettings(Configurable):
 
         ######## Network parameters ########
         desc = 'Local interface name to use when sniffing, doing reverse'\
-               ' connections, etc.'
+                   ' connections, etc.'
         opt = opt_factory('interface', cf.cf.get('interface'), desc,
                           'string', tabid='Network settings')
         ol.add(opt)

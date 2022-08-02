@@ -45,12 +45,11 @@ class TestLocalProxy(unittest.TestCase):
         self._proxy = LocalProxy(self.IP, 0)
         self._proxy.start()
         self._proxy.wait_for_start()
-        
+
         port = self._proxy.get_port()
 
         # Build the proxy opener
-        proxy_handler = urllib2.ProxyHandler({"http": "http://%s:%s"
-                                              % (self.IP, port)})
+        proxy_handler = urllib2.ProxyHandler({"http": f"http://{self.IP}:{port}"})
         self.proxy_opener = urllib2.build_opener(proxy_handler,
                                                  urllib2.HTTPHandler)
     

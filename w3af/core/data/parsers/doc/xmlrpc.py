@@ -107,15 +107,14 @@ class XmlRpcWriteHandler(ContentHandler):
 
         # Flatten the OrderedDict to easily iterate it with startElement
         for key, value_list in data_container.items():
-            for value in value_list:
-                self._fuzzed_parameters.append((key, value))
+            self._fuzzed_parameters.extend((key, value) for value in value_list)
 
     def startElement(self, name, attrs):
         if name in FUZZABLE_TYPES:
             self._inside_fuzzable = True
             self._fuzzable_index += 1
 
-        self.fuzzed_xml_string += '<%s' % name
+        self.fuzzed_xml_string += f'<{name}'
 
         for attr_name in attrs.getNames():
             self.fuzzed_xml_string += ' %s="%s"' % (attr_name,
@@ -144,7 +143,7 @@ class XmlRpcWriteHandler(ContentHandler):
 
     def endElement(self, name):
         self._inside_fuzzable = False
-        self.fuzzed_xml_string += '</%s>' % name
+        self.fuzzed_xml_string += f'</{name}>'
 
 
 def parse_xmlrpc(xml_string):

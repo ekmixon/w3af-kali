@@ -40,12 +40,12 @@ def get_w3af_version():
     :return: A string with the w3af version.
     """
     commit = to_short_id(get_latest_commit()) if is_git_repo() else 'unknown'
-    cdate = ' - %s' % get_latest_commit_date() if is_git_repo() else ''
+    cdate = f' - {get_latest_commit_date()}' if is_git_repo() else ''
     branch = get_current_branch() if is_git_repo() else 'unknown'
     dirty = 'Yes' if is_dirty_repo() else 'No'
 
     vnumber = get_minimalistic_version()
-    
+
     return ('w3af - Web Application Attack and Audit Framework\n'
             'Version: %s\n'
             'Revision: %s%s\n'
